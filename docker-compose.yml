@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  delta-mem:
+    build: .
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    environment:
+      - DATA_DIR=/data/states
+      - GEMMA_URL=http://ollama:11434
+    volumes:
+      - ./data/states:/data/states
+      - ./models:/models
+    depends_on:
+      - ollama
+      - turbovec
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama:/root/.ollama
+    command: serve
+
+  turbovec:
+    build:
+      context: .
+      dockerfile: Dockerfile.turbovec
+    ports:
+      - "8001:8001"

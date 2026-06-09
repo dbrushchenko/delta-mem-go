@@ -1,0 +1,9 @@
+http_port: 8080
+grpc_port: 9090
+data_dir: /data/states
+model_path: /models/nomic-embed-text-v1.5.onnx
+embed_dim: 768
+rate_limit: 1000
+log_level: info
+gemma_model_path: /models/gemma-4-e4b-it-q4.gguf
+turbovec_url: http://turbovec:8001

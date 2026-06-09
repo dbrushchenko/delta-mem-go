@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package deltamem;
+
+option go_package = "github.com/dbrushchenko/delta-mem-go/proto";
+
+service DeltaMem {
+  // Original δ-mem methods (kept for backward compatibility)
+  rpc Store(StoreRequest) returns (StoreResponse);
+  rpc Recall(RecallRequest) returns (RecallResponse);
+  rpc StoreHidden(HiddenStoreRequest) returns (StoreResponse);
+  rpc RecallHidden(HiddenRecallRequest) returns (HiddenRecallResponse);
+  rpc Health(Empty) returns (HealthResponse);
+  rpc ResetState(OwnerRequest) returns (Empty);
+
+  // New methods — fully exposed (nomic + IBNN + turbovec + Gemma 4 QAT)
+  rpc IBNNForward(IBNNForwardRequest) returns (IBNNForwardResponse);
+  rpc IBNNForwardHidden(IBNNForwardHiddenRequest) returns (IBNNForwardResponse);
+  rpc TurboAdd(TurboAddRequest) returns (TurboAddResponse);
+  rpc TurboSearch(TurboSearchRequest) returns (TurboSearchResponse);
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+}
+
+// Original messages (unchanged)
+message StoreRequest {
+  string owner = 1;
+  string key = 2;
+  string content = 3;
+}
+
+message StoreResponse {
+  bool ok = 1;
+  float state_norm = 2;
+}
+
+message RecallRequest {
+  string owner = 1;
+  string query = 2;
+}
+
+message RecallResponse {
+  repeated float correction = 1;
+  float confidence = 2;
+}
+
+message HiddenStoreRequest {
+  string owner = 1;
+  repeated float hidden_state = 2;
+}
+
+message HiddenRecallRequest {
+  string owner = 1;
+  repeated float query_state = 2;
+}
+
+message HiddenRecallResponse {
+  repeated float delta_q = 1;
+  repeated float delta_o = 2;
+  float confidence = 3;
+}
+
+message HealthResponse {
+  int32 owners_active = 1;
+  float avg_state_norm = 2;
+  int64 total_stores = 3;
+  int64 total_recalls = 4;
+  string uptime = 5;
+}
+
+message OwnerRequest {
+  string owner = 1;
+}
+
+message Empty {}
+
+// New messages for IBNN, turbovec, Gemma 4 QAT
+message IBNNForwardRequest {
+  string owner = 1;
+  string text = 2;
+}
+
+message IBNNForwardHiddenRequest {
+  string owner = 1;
+  repeated float hidden_state = 2;
+}
+
+message IBNNForwardResponse {
+  repeated float output = 1;
+  int32 dim = 2;
+}
+
+message TurboAddRequest {
+  string owner = 1;
+  string id = 2;
+  repeated float vector = 3;
+}
+
+message TurboAddResponse {
+  bool ok = 1;
+}
+
+message TurboSearchRequest {
+  string owner = 1;
+  repeated float query = 2;
+  int32 k = 3;
+}
+
+message TurboSearchResponse {
+  repeated string ids = 1;
+  repeated float scores = 2;
+}
+
+message GenerateRequest {
+  string owner = 1;
+  string prompt = 2;
+}
+
+message GenerateResponse {
+  string response = 1;
+}

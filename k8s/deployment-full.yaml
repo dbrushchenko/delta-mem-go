@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delta-mem-go
+  labels:
+    app: delta-mem
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: delta-mem
+  template:
+    metadata:
+      labels:
+        app: delta-mem
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: delta-mem
+        image: your-registry/delta-mem-go:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        env:
+        - name: MODEL_PATH
+          value: "/models/nomic-embed-text-v1.5.onnx"
+        - name: ORT_LIB_PATH
+          value: "/usr/local/lib/libonnxruntime.so"
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        volumeMounts:
+        - name: states
+          mountPath: /data/states
+        - name: models
+          mountPath: /models
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+      volumes:
+      - name: states
+        persistentVolumeClaim:
+          claimName: delta-mem-states-pvc
+      - name: models
+        hostPath:
+          path: /mnt/models

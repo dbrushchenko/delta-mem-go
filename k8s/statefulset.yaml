@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: delta-mem-go
+spec:
+  serviceName: delta-mem
+  replicas: 3
+  selector:
+    matchLabels:
+      app: delta-mem
+  template:
+    metadata:
+      labels:
+        app: delta-mem
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+      - name: delta-mem
+        image: your-registry/delta-mem-go:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        volumeMounts:
+        - name: states
+          mountPath: /data/states
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+  volumeClaimTemplates:
+  - metadata:
+      name: states
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 50Gi

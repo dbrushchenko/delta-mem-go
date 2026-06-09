@@ -1,0 +1,8 @@
+delta-mem-go
+delta-mem-go.exe
+data/states/*
+models/
+ollama/
+*.onnx
+*.gguf
+extract_*.txt
