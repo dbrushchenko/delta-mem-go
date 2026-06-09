@@ -9,7 +9,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -24,13 +23,8 @@ func InitTracer(otlpEndpoint string) (func(), error) {
 	if err != nil {
 		return nil, err
 	}
-	res, _ := resource.Merge(
-		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("delta-mem-go"),
-			semconv.ServiceVersion("v2-enterprise"),
-		),
+	res, _ := resource.New(context.Background(),
+		resource.WithAttributes(),
 	)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(5*time.Second)),

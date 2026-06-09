@@ -1,0 +1,48 @@
+include:
+  - project: 'cawsc/itt/ansible/usgs-mesh'
+    ref: master
+    file: '/deploy/ci-templates/kaniko-build.yml'
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  IMAGE: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+  IMAGE_LATEST: "${CI_REGISTRY_IMAGE}:latest"
+
+build:
+  extends: .kaniko-build
+  variables:
+    DOCKERFILE: Dockerfile
+    BUILD_CONTEXT: .
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+
+test:
+  stage: test
+  image: golang:1.23
+  tags: [docker, sacramento, mesh]
+  script:
+    - go build ./...
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+
+deploy:
+  stage: deploy
+  image: alpine/k8s:1.31.4
+  tags: [docker, sacramento, mesh]
+  script:
+    - for SITE in SAC SD MOF; do
+    -   eval export KUBECONFIG="\$KUBE_CONFIG_${SITE}"
+    -   echo "=== Deploying mem-go to ${SITE} ==="
+    -   kubectl set image deployment/mem-go mem-go=$IMAGE -n mesh 2>/dev/null || kubectl create deployment mem-go --image=$IMAGE -n mesh
+    - done
+    - eval export KUBECONFIG="$KUBE_CONFIG_SAC"
+    - kubectl get pods -n mesh -l app=mem-go
+  environment:
+    name: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual

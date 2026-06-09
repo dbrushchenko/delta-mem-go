@@ -1,8 +1,8 @@
 delta-mem-go
-delta-mem-go.exe
-data/states/*
-models/
-ollama/
+*.exe
+data/states/*.state
+data/states/*.turbogo
+data/states/*.ibnn.state
+extract_*.txt
 *.onnx
 *.gguf
-extract_*.txt
