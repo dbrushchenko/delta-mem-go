@@ -34,7 +34,7 @@ func main() {
 
 	// Phase 1: Initiation
 	fmt.Println("--- Phase 1: INITIATION ---")
-	data, _ := os.ReadFile(`C:\Users\dabrush\mem-go\training_3.txt`)
+	data, _ := os.ReadFile(`C:\Users\dabrush\mem-go\data\training_data\training_3.txt`)
 	start := time.Now()
 	result, err := engine.Initiate(string(data), owner, thoughts.InitConfig{Epochs: 3, ChunkSize: 200})
 	if err != nil { fmt.Fprintf(os.Stderr, "FAIL initiate: %v\n", err); os.Exit(1) }

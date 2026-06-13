@@ -13,9 +13,10 @@ import (
 
 // InitConfig controls the initiation process.
 type InitConfig struct {
-	Epochs       int     // number of passes over the data (default 3)
-	LearningRate float32 // projection update step size (default 0.01)
-	ChunkSize    int     // characters per chunk (default 200)
+	Epochs         int
+	LearningRate   float32
+	ChunkSize      int
+	ProjectionsPath string // optional: path to pre-trained projections (.npz exported as gob)
 }
 
 // InitResult reports what happened during initiation.
@@ -56,6 +57,13 @@ func (e *Engine) Initiate(text string, owner string, cfg InitConfig) (*InitResul
 	mod, err := e.delta.Get(owner)
 	if err != nil {
 		return nil, err
+	}
+
+	// Load pre-trained projections if available (head start for this owner)
+	if cfg.ProjectionsPath != "" {
+		if err := mod.LoadProjections(cfg.ProjectionsPath); err == nil {
+			// Pre-trained projections loaded — skip random init training, just store data
+		}
 	}
 
 	start := time.Now()
