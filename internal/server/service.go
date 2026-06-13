@@ -9,6 +9,7 @@ import (
 	"github.com/dbrushchenko/delta-mem-go/internal/deltamem"
 	"github.com/dbrushchenko/delta-mem-go/internal/gemma"
 	"github.com/dbrushchenko/delta-mem-go/internal/ibnn"
+	"github.com/dbrushchenko/delta-mem-go/internal/thoughts"
 	"github.com/dbrushchenko/delta-mem-go/internal/turbovec"
 )
 
@@ -20,11 +21,16 @@ type Service struct {
 	turboOM     *turbovec.OwnerManager
 	gemma       *gemma.Client
 	turbovecCli *turbovec.Client
+	thoughts    *thoughts.Engine
 	started     time.Time
 }
 
 func New(deltaOM *deltamem.OwnerManager, ibnnOM *ibnn.OwnerManager, turboOM *turbovec.OwnerManager, gemmaClient *gemma.Client, turbovecClient *turbovec.Client) *Service {
-	return &Service{om: deltaOM, ibnnOM: ibnnOM, turboOM: turboOM, gemma: gemmaClient, turbovecCli: turbovecClient, started: time.Now()}
+	return &Service{
+		om: deltaOM, ibnnOM: ibnnOM, turboOM: turboOM, gemma: gemmaClient, turbovecCli: turbovecClient,
+		thoughts: thoughts.New(deltaOM, ibnnOM, turboOM, gemmaClient),
+		started:  time.Now(),
+	}
 }
 
 func (s *Service) Store(ctx context.Context, owner, key, content string) (float32, error) {
@@ -85,6 +91,40 @@ func (s *Service) TurboSearch(ctx context.Context, owner string, query []float32
 func (s *Service) Generate(ctx context.Context, owner, prompt string) (string, error) {
 	if s.gemma == nil { return "", fmt.Errorf("gemma not initialized") }
 	return s.gemma.Generate(ctx, prompt)
+}
+
+func (s *Service) Think(ctx context.Context, owner string, seeds []string) (*thoughts.Thought, error) {
+	return s.thoughts.Think(ctx, owner, seeds)
+}
+
+func (s *Service) StartWander(owner string) {
+	s.thoughts.StartWander(owner)
+}
+
+func (s *Service) StopWander(owner string) {
+	s.thoughts.StopWander(owner)
+}
+
+func (s *Service) HarvestWander(owner string) []*thoughts.Thought {
+	return s.thoughts.HarvestWander(owner)
+}
+
+func (s *Service) AddAxiom(statement, domain string) {
+	s.thoughts.Truth().AddAxiom(statement, domain)
+}
+
+func (s *Service) Adapt(ctx context.Context, owner, wrong, right string) (float32, error) {
+	c, err := s.thoughts.Adapt(ctx, owner, wrong, right)
+	if err != nil { return 0, err }
+	return c.Impact, nil
+}
+
+func (s *Service) Learn(ctx context.Context, owner, fact string) error {
+	return s.thoughts.Learn(ctx, owner, fact)
+}
+
+func (s *Service) Forget(ctx context.Context, owner, what string) error {
+	return s.thoughts.Forget(ctx, owner, what)
 }
 
 func textToHidden(text string) []float32 {

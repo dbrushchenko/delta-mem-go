@@ -78,3 +78,42 @@ type GenerateRequest struct {
 type GenerateResponse struct {
 	Response string `json:"response"`
 }
+
+type ThinkRequest struct {
+	Owner string   `json:"owner"`
+	Seeds []string `json:"seeds"`
+}
+type ThinkResponse struct {
+	Idea       string   `json:"idea"`
+	Seeds      []string `json:"seeds"`
+	Neighbors  []string `json:"neighbors"`
+	Confidence float32  `json:"confidence"`
+	Novelty    float32  `json:"novelty"`
+	Grounding  float32  `json:"grounding"`
+	Depth      int32    `json:"depth"`
+	Valid      bool     `json:"valid"`
+}
+type HarvestResponse struct {
+	Thoughts []*ThinkResponse `json:"thoughts"`
+}
+type AxiomRequest struct {
+	Statement string `json:"statement"`
+	Domain    string `json:"domain"`
+}
+
+type AdaptRequest struct {
+	Owner string `json:"owner"`
+	Wrong string `json:"wrong"`
+	Right string `json:"right"`
+}
+type AdaptResponse struct {
+	Impact float32 `json:"impact"`
+}
+type LearnRequest struct {
+	Owner string `json:"owner"`
+	Fact  string `json:"fact"`
+}
+type ForgetRequest struct {
+	Owner string `json:"owner"`
+	What  string `json:"what"`
+}

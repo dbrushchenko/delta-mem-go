@@ -98,3 +98,63 @@ func (g *GRPCService) Generate(ctx context.Context, req *pb.GenerateRequest) (*p
 	}
 	return &pb.GenerateResponse{Response: resp}, nil
 }
+
+// === NEW: Thoughts — novel idea synthesis ===
+func (g *GRPCService) Think(ctx context.Context, req *pb.ThinkRequest) (*pb.ThinkResponse, error) {
+	thought, err := g.Svc.Think(ctx, req.Owner, req.Seeds)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ThinkResponse{
+		Idea:       thought.Idea,
+		Seeds:      thought.Seeds,
+		Neighbors:  thought.Neighbors,
+		Confidence: thought.Confidence,
+		Novelty:    thought.Novelty,
+		Grounding:  thought.Grounding,
+		Depth:      int32(thought.Depth),
+		Valid:      thought.Valid,
+	}, nil
+}
+
+func (g *GRPCService) StartWander(ctx context.Context, req *pb.OwnerRequest) (*pb.Empty, error) {
+	g.Svc.StartWander(req.Owner)
+	return &pb.Empty{}, nil
+}
+
+func (g *GRPCService) StopWander(ctx context.Context, req *pb.OwnerRequest) (*pb.Empty, error) {
+	g.Svc.StopWander(req.Owner)
+	return &pb.Empty{}, nil
+}
+
+func (g *GRPCService) HarvestWander(ctx context.Context, req *pb.OwnerRequest) (*pb.HarvestResponse, error) {
+	raw := g.Svc.HarvestWander(req.Owner)
+	resp := &pb.HarvestResponse{}
+	for _, t := range raw {
+		resp.Thoughts = append(resp.Thoughts, &pb.ThinkResponse{
+			Idea: t.Idea, Seeds: t.Seeds, Neighbors: t.Neighbors,
+			Confidence: t.Confidence, Novelty: t.Novelty,
+			Grounding: t.Grounding, Depth: int32(t.Depth), Valid: t.Valid,
+		})
+	}
+	return resp, nil
+}
+
+func (g *GRPCService) AddAxiom(ctx context.Context, req *pb.AxiomRequest) (*pb.Empty, error) {
+	g.Svc.AddAxiom(req.Statement, req.Domain)
+	return &pb.Empty{}, nil
+}
+
+func (g *GRPCService) Adapt(ctx context.Context, req *pb.AdaptRequest) (*pb.AdaptResponse, error) {
+	impact, err := g.Svc.Adapt(ctx, req.Owner, req.Wrong, req.Right)
+	if err != nil { return nil, err }
+	return &pb.AdaptResponse{Impact: impact}, nil
+}
+
+func (g *GRPCService) Learn(ctx context.Context, req *pb.LearnRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, g.Svc.Learn(ctx, req.Owner, req.Fact)
+}
+
+func (g *GRPCService) Forget(ctx context.Context, req *pb.ForgetRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, g.Svc.Forget(ctx, req.Owner, req.What)
+}

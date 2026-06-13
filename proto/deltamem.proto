@@ -19,6 +19,13 @@ service DeltaMem {
   rpc TurboAdd(TurboAddRequest) returns (TurboAddResponse);
   rpc TurboSearch(TurboSearchRequest) returns (TurboSearchResponse);
   rpc Generate(GenerateRequest) returns (GenerateResponse);
+
+  // Thoughts — novel idea synthesis
+  rpc Think(ThinkRequest) returns (ThinkResponse);
+  rpc StartWander(OwnerRequest) returns (Empty);
+  rpc StopWander(OwnerRequest) returns (Empty);
+  rpc HarvestWander(OwnerRequest) returns (HarvestResponse);
+  rpc AddAxiom(AxiomRequest) returns (Empty);
 }
 
 // Original messages (unchanged)
@@ -117,4 +124,18 @@ message GenerateRequest {
 
 message GenerateResponse {
   string response = 1;
+}
+
+
+message ThinkRequest {
+  string owner = 1;
+  repeated string seeds = 2;
+}
+
+message ThinkResponse {
+  string idea = 1;
+  repeated string seeds = 2;
+  repeated string neighbors = 3;
+  float confidence = 4;
+  float novelty = 5;
 }

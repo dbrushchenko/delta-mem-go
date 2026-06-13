@@ -54,3 +54,9 @@ func (om *OwnerManager) SearchVector(owner string, query []float32, k int) ([]st
 	}
 	return ids, scores, nil
 }
+
+
+func (om *OwnerManager) RemoveVector(owner, id string) {
+	idx := om.get(owner)
+	delete(idx.vectors, id)
+}

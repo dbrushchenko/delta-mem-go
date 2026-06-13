@@ -19,6 +19,14 @@ type DeltaMemServer interface {
 	TurboAdd(context.Context, *TurboAddRequest) (*TurboAddResponse, error)
 	TurboSearch(context.Context, *TurboSearchRequest) (*TurboSearchResponse, error)
 	Generate(context.Context, *GenerateRequest) (*GenerateResponse, error)
+	Think(context.Context, *ThinkRequest) (*ThinkResponse, error)
+	StartWander(context.Context, *OwnerRequest) (*Empty, error)
+	StopWander(context.Context, *OwnerRequest) (*Empty, error)
+	HarvestWander(context.Context, *OwnerRequest) (*HarvestResponse, error)
+	AddAxiom(context.Context, *AxiomRequest) (*Empty, error)
+	Adapt(context.Context, *AdaptRequest) (*AdaptResponse, error)
+	Learn(context.Context, *LearnRequest) (*Empty, error)
+	Forget(context.Context, *ForgetRequest) (*Empty, error)
 }
 
 type UnimplementedDeltaMemServer struct{}
@@ -54,6 +62,30 @@ func (UnimplementedDeltaMemServer) TurboSearch(context.Context, *TurboSearchRequ
 	return nil, nil
 }
 func (UnimplementedDeltaMemServer) Generate(context.Context, *GenerateRequest) (*GenerateResponse, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) Think(context.Context, *ThinkRequest) (*ThinkResponse, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) StartWander(context.Context, *OwnerRequest) (*Empty, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) StopWander(context.Context, *OwnerRequest) (*Empty, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) HarvestWander(context.Context, *OwnerRequest) (*HarvestResponse, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) AddAxiom(context.Context, *AxiomRequest) (*Empty, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) Adapt(context.Context, *AdaptRequest) (*AdaptResponse, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) Learn(context.Context, *LearnRequest) (*Empty, error) {
+	return nil, nil
+}
+func (UnimplementedDeltaMemServer) Forget(context.Context, *ForgetRequest) (*Empty, error) {
 	return nil, nil
 }
 
