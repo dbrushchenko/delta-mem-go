@@ -40,7 +40,18 @@ func New(deltaOM *deltamem.OwnerManager, ibnnOM *ibnn.OwnerManager, turboOM *tur
 
 func (s *Service) Store(ctx context.Context, owner, key, content string) (float32, error) {
 	hidden := s.embed(key + " " + content)
-	if s.om != nil { return s.om.Store(owner, hidden) }
+	if s.om != nil {
+		norm, err := s.om.Store(owner, hidden)
+		if err != nil { return 0, err }
+		// Also index in turbogo for retrieval
+		if s.turboOM != nil {
+			id := key
+			if len(id) > 60 { id = id[:60] }
+			s.turboOM.AddVector(owner, id, hidden)
+			s.turboOM.Save(owner)
+		}
+		return norm, nil
+	}
 	return 1.0, nil
 }
 
