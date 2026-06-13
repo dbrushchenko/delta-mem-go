@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: delta-mem-go
+  namespace: mesh
   labels:
     app: delta-mem
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: delta-mem
@@ -21,36 +22,55 @@ spec:
     spec:
       containers:
       - name: delta-mem
-        image: your-registry/delta-mem-go:latest
+        image: code.usgs.gov:5050/daniel_brushchenko/mem-go:latest
         ports:
         - containerPort: 8080
+          name: http
         - containerPort: 9090
+          name: grpc
         env:
-        - name: MODEL_PATH
-          value: "/models/nomic-embed-text-v1.5.onnx"
-        - name: ORT_LIB_PATH
-          value: "/usr/local/lib/libonnxruntime.so"
+        - name: ORT_LIB_DIR
+          value: "/usr/local/lib"
         resources:
           requests:
-            cpu: "1"
-            memory: "2Gi"
+            cpu: "500m"
+            memory: "1Gi"
           limits:
-            cpu: "4"
-            memory: "8Gi"
+            cpu: "2"
+            memory: "4Gi"
         volumeMounts:
-        - name: states
-          mountPath: /data/states
+        - name: data
+          mountPath: /data
         - name: models
           mountPath: /models
         readinessProbe:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 30
       volumes:
-      - name: states
+      - name: data
         persistentVolumeClaim:
-          claimName: delta-mem-states-pvc
+          claimName: delta-mem-data
       - name: models
-        hostPath:
-          path: /mnt/models
+        persistentVolumeClaim:
+          claimName: delta-mem-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delta-mem
+  namespace: mesh
+spec:
+  selector:
+    app: delta-mem
+  ports:
+  - name: http
+    port: 8080
+  - name: grpc
+    port: 9090

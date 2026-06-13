@@ -22,10 +22,10 @@ build:
 
 test:
   stage: test
-  image: golang:1.23
+  image: golang:1.25
   tags: [docker, sacramento, mesh]
   script:
-    - go build ./...
+    - CGO_ENABLED=1 go build ./...
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
 
