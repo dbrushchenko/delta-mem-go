@@ -218,7 +218,7 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 	thoughtHidden := embed(idea)
 	e.delta.Store(owner, thoughtHidden)
 	if e.turbo != nil {
-		e.turbo.AddVector(owner, fmt.Sprintf("thought_%d", hashStr(idea)), thoughtHidden)
+		e.turbo.AddVector(owner, turbovec.ExtractID(idea), thoughtHidden)
 	}
 
 	return &Thought{

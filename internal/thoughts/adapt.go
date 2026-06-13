@@ -2,8 +2,9 @@ package thoughts
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	"github.com/dbrushchenko/delta-mem-go/internal/turbovec"
 )
 
 // Correction is a single learning event: what was wrong, what's true.
@@ -47,8 +48,8 @@ func (e *Engine) Adapt(ctx context.Context, owner, wrong, right string) (*Correc
 
 	// In turbogo: replace, don't just remove
 	if e.turbo != nil {
-		e.turbo.RemoveVector(owner, fmt.Sprintf("thought_%d", hashStr(wrong)))
-		e.turbo.AddVector(owner, fmt.Sprintf("truth_%d", hashStr(right)), rightVec)
+		e.turbo.RemoveVector(owner, turbovec.ExtractID(wrong))
+		e.turbo.AddVector(owner, turbovec.ExtractID(right), rightVec)
 	}
 
 	impact := 1.0 - cosine(wrongVec, rightVec)
@@ -68,7 +69,7 @@ func (e *Engine) Learn(ctx context.Context, owner, fact string) error {
 	e.delta.Store(owner, vec)
 	e.truth.Prove(fact, 0.7, "learned")
 	if e.turbo != nil {
-		e.turbo.AddVector(owner, fmt.Sprintf("fact_%d", hashStr(fact)), vec)
+		e.turbo.AddVector(owner, turbovec.ExtractID(fact), vec)
 	}
 	return nil
 }
@@ -92,9 +93,7 @@ func (e *Engine) Forget(ctx context.Context, owner, what string) error {
 	e.delta.Store(owner, neutral)
 	if e.turbo != nil {
 		// Replace in index with the inert version, don't delete
-		e.turbo.RemoveVector(owner, fmt.Sprintf("thought_%d", hashStr(what)))
-		e.turbo.RemoveVector(owner, fmt.Sprintf("fact_%d", hashStr(what)))
-		e.turbo.RemoveVector(owner, fmt.Sprintf("truth_%d", hashStr(what)))
+		e.turbo.RemoveVector(owner, turbovec.ExtractID(what))
 	}
 	return nil
 }
