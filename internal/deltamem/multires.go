@@ -1,25 +1,25 @@
 package deltamem
 
 // MultiRes wraps a Module with multi-resolution state layers.
-// S_fast: R=16, high beta (learns fast, decays fast) — recent context
-// S (inherited): R=64, default dynamics — working memory
-// S_deep: R=128, low beta (learns slow, persists forever) — long-term knowledge
+// S_fast: R=16, high beta (learns fast, decays fast) — hot/recent
+// S (inherited): R=64, default dynamics — warm/working memory
+// S_deep: R=768, low beta (learns slow, persists forever) — cold/long-term (matches embedder dim)
 type MultiRes struct {
 	*Module
-	Fast *Module // R=16, high beta
-	Deep *Module // R=128, low beta
+	Fast *Module // R=16, hot
+	Deep *Module // R=768, cold (full embedding dimension)
 }
 
 // NewMultiRes creates a multi-resolution module.
 func NewMultiRes(dim int) *MultiRes {
 	main := New(Config{R: 64, HiddenDim: dim, NormCap: 10.0})
 	fast := New(Config{R: 16, HiddenDim: dim, NormCap: 5.0})
-	deep := New(Config{R: 128, HiddenDim: dim, NormCap: 20.0})
+	deep := New(Config{R: dim, HiddenDim: dim, NormCap: 50.0}) // R=768, full dim
 	// Fast layer: high beta (aggressive write), high lambda (fast decay)
 	for i := range fast.WBeta { fast.WBeta[i] *= 3.0 }
 	// Deep layer: low beta (conservative write), very high lambda (never forget)
-	for i := range deep.WBeta { deep.WBeta[i] *= 0.3 }
-	for i := range deep.WLambda { deep.WLambda[i] = 0.5 } // biases toward high lambda
+	for i := range deep.WBeta { deep.WBeta[i] *= 0.1 }
+	for i := range deep.WLambda { deep.WLambda[i] = 0.5 }
 	return &MultiRes{Module: main, Fast: fast, Deep: deep}
 }
 
