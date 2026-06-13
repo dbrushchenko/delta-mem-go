@@ -21,6 +21,10 @@ type Config struct {
 	GemmaModelPath string
 	GemmaURL      string
 	TurbovecURL   string
+	// State backend: "file" (default, local gob) or "redis" (mesh, shared state)
+	Backend       string
+	RedisURL      string
+	PostgresURL   string
 }
 
 func Load() *Config {
@@ -46,6 +50,9 @@ func Load() *Config {
 	flag.IntVar(&c.RateLimit, "rate-limit", c.RateLimit, "requests/min per owner")
 	flag.StringVar(&c.LogLevel, "log-level", c.LogLevel, "debug|info|warn|error")
 	flag.StringVar(&c.GemmaModelPath, "gemma-model-path", "", "path to Gemma GGUF file")
+	flag.StringVar(&c.Backend, "backend", "file", "state backend: file or redis")
+	flag.StringVar(&c.RedisURL, "redis-url", "", "Redis address (for backend=redis)")
+	flag.StringVar(&c.PostgresURL, "pg-url", "", "PostgreSQL connection string (for durable offload)")
 	flag.Parse()
 
 	if v := os.Getenv("DATA_DIR"); v != "" {
