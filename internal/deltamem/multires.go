@@ -1,9 +1,9 @@
 package deltamem
 
 // MultiRes wraps a Module with multi-resolution state layers.
-// S_fast: R=16, high beta (learns fast, decays fast) — hot/recent
-// S (inherited): R=64, default dynamics — warm/working memory
-// S_deep: R=768, low beta (learns slow, persists forever) — cold/long-term (matches embedder dim)
+// S_fast: R=64 (standard 64×64), high beta — hot/recent
+// S (main): R=128, default dynamics — warm/working memory
+// S_deep: R=768, low beta — cold/long-term (full embedding dimension, permanent)
 type MultiRes struct {
 	*Module
 	Fast *Module // R=16, hot
@@ -12,9 +12,9 @@ type MultiRes struct {
 
 // NewMultiRes creates a multi-resolution module.
 func NewMultiRes(dim int) *MultiRes {
-	main := New(Config{R: 64, HiddenDim: dim, NormCap: 10.0})
-	fast := New(Config{R: 16, HiddenDim: dim, NormCap: 5.0})
-	deep := New(Config{R: dim, HiddenDim: dim, NormCap: 50.0}) // R=768, full dim
+	main := New(Config{R: 128, HiddenDim: dim, NormCap: 10.0})  // warm, extended working memory
+	fast := New(Config{R: 64, HiddenDim: dim, NormCap: 5.0})    // hot, standard 64x64
+	deep := New(Config{R: dim, HiddenDim: dim, NormCap: 50.0})  // cold, full dim, permanent
 	// Fast layer: high beta (aggressive write), high lambda (fast decay)
 	for i := range fast.WBeta { fast.WBeta[i] *= 3.0 }
 	// Deep layer: low beta (conservative write), very high lambda (never forget)
