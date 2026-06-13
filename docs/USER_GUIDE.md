@@ -136,6 +136,56 @@ docker compose exec delta-mem delta-mem-go \
 
 After initiation, the service can be restarted and will load the trained state.
 
+### Initiation on the Mesh (Microservice Mode)
+
+When running as a mesh microservice, each owner initiates via API call — not at startup.
+
+**Via mem-cli (gRPC):**
+```bash
+mem-cli --addr delta-mem.mesh.svc:9090 initiate --owner jsmith --training-data ./my-corpus.txt
+```
+
+**Via HTTP API:**
+```bash
+curl -X POST http://delta-mem.mesh.svc:8080/initiate \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key" \
+  -d '{
+    "owner": "jsmith",
+    "text": "...your domain training corpus...",
+    "epochs": 5,
+    "learning_rate": 0.01
+  }'
+```
+
+**Response:**
+```json
+{
+  "chunks": 546,
+  "epochs": 5,
+  "duration": "45.2s",
+  "state_norm": 0.12,
+  "avg_confidence": 0.054
+}
+```
+
+**How it works on the mesh:**
+1. Any pod can serve the initiation request (stateless — state goes to Redis+PG)
+2. Training runs on the pod that received the request (~45s for 90 KB)
+3. Resulting state is stored in Redis (shared cache) + PostgreSQL (durable)
+4. After initiation, any pod can serve Store/Recall/Think for that owner
+5. No restart needed — the owner is immediately active
+
+**When to initiate:**
+- First time an owner starts using the system
+- When switching domains (new team, new project)
+- To refresh after significant knowledge changes
+
+**Size guidelines:**
+- 10 KB corpus → ~5s initiation (light)
+- 90 KB corpus → ~45s initiation (standard)
+- 500 KB corpus → ~4 min initiation (comprehensive)
+
 ## Using mem-cli
 
 `mem-cli` is a compiled Go binary that communicates with δ-mem-go over gRPC.
