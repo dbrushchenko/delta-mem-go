@@ -148,14 +148,33 @@ func wordpiece(text string, vocab map[string]int) []int64 {
 }
 
 func parseVocab(data []byte) map[string]int {
-	var tok struct{ Model struct{ Vocab map[string]int `json:"vocab"` } `json:"model"` }
-	if json.Unmarshal(data, &tok) == nil && len(tok.Model.Vocab) > 0 {
-		return tok.Model.Vocab
+	// Try HuggingFace tokenizer.json format: model.vocab as [[token, score], ...]
+	var tok struct {
+		Model struct {
+			Vocab json.RawMessage `json:"vocab"`
+		} `json:"model"`
 	}
-	// Try flat vocab format
-	var flat map[string]int
-	if json.Unmarshal(data, &flat) == nil && len(flat) > 0 {
-		return flat
+	if json.Unmarshal(data, &tok) != nil { return nil }
+
+	// Try list format: [[token, score], ...]
+	var listVocab [][]interface{}
+	if json.Unmarshal(tok.Model.Vocab, &listVocab) == nil && len(listVocab) > 0 {
+		vocab := make(map[string]int, len(listVocab))
+		for i, entry := range listVocab {
+			if len(entry) >= 1 {
+				if token, ok := entry[0].(string); ok {
+					vocab[token] = i
+				}
+			}
+		}
+		if len(vocab) > 0 { return vocab }
 	}
+
+	// Try dict format: {token: id}
+	var dictVocab map[string]int
+	if json.Unmarshal(tok.Model.Vocab, &dictVocab) == nil && len(dictVocab) > 0 {
+		return dictVocab
+	}
+
 	return nil
 }
