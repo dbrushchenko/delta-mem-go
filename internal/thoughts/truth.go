@@ -19,8 +19,16 @@ import (
 // 3. Grounding — a thought must connect to something real (retrievable from memory)
 type TruthEngine struct {
 	axioms  []Axiom
-	proven  []Proven // thoughts that passed validation and became trusted
+	proven  []Proven
+	nli     NLIChecker // optional — second opinion when heuristic is uncertain
 	mu      sync.RWMutex
+}
+
+// NLIChecker is the interface for natural language inference.
+// Returns "contradiction", "entailment", or "neutral" with confidence.
+// When nil, truth engine uses heuristic only.
+type NLIChecker interface {
+	Check(textA, textB string) (label string, confidence float32)
 }
 
 // Axiom is an immutable truth. It cannot be overridden by generation.
@@ -50,6 +58,13 @@ type Verdict struct {
 
 func NewTruthEngine() *TruthEngine {
 	return &TruthEngine{}
+}
+
+// SetNLI attaches an optional NLI model for second-opinion contradiction detection.
+func (t *TruthEngine) SetNLI(nli NLIChecker) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.nli = nli
 }
 
 // AddAxiom registers an immutable truth.
@@ -98,6 +113,16 @@ func (t *TruthEngine) Validate(ctx context.Context, thought string) *Verdict {
 				verdict.Contradictions = append(verdict.Contradictions, axiom.Statement)
 				verdict.Reason = "contradicts axiom: " + axiom.Statement
 				return verdict
+			}
+			// Heuristic didn't catch it. If NLI available and sim < 0.97, get second opinion.
+			if t.nli != nil && sim < 0.97 {
+				label, conf := t.nli.Check(thought, axiom.Statement)
+				if label == "contradiction" && conf > 0.7 {
+					verdict.Valid = false
+					verdict.Contradictions = append(verdict.Contradictions, axiom.Statement)
+					verdict.Reason = "NLI contradiction: " + axiom.Statement
+					return verdict
+				}
 			}
 			// Not an inversion — it agrees
 			verdict.Grounding = maxF(verdict.Grounding, sim)
