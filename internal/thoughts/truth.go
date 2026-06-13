@@ -76,15 +76,7 @@ func (t *TruthEngine) Validate(ctx context.Context, thought string) *Verdict {
 	for _, axiom := range t.axioms {
 		sim := cosine(embed, axiom.Embedding)
 
-		// Near-identical (>0.95) = agrees with axiom
-		if sim > 0.95 {
-			verdict.Grounding = maxF(verdict.Grounding, sim)
-			continue
-		}
-
-		// High but not identical (0.7-0.95): same topic, possibly different claim.
-		// This is where semantic inversions hide ("earth orbits sun" vs "sun orbits earth").
-		// Check for subject/object swap or negation.
+		// Any high similarity (>0.7): check for inversion FIRST, then decide if it agrees
 		if sim > 0.7 {
 			if containsNegation(thought, axiom.Statement) || isSemanticInversion(thought, axiom.Statement) {
 				verdict.Valid = false
@@ -92,7 +84,8 @@ func (t *TruthEngine) Validate(ctx context.Context, thought string) *Verdict {
 				verdict.Reason = "contradicts axiom: " + axiom.Statement
 				return verdict
 			}
-			verdict.Grounding = maxF(verdict.Grounding, sim*0.5)
+			// Not an inversion — it agrees
+			verdict.Grounding = maxF(verdict.Grounding, sim)
 			continue
 		}
 
