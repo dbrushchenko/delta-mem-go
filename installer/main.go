@@ -99,6 +99,13 @@ func main() {
 	// 8. Training data (optional)
 	trainData := prompt("Training data file for initiation (optional, press Enter to skip)", "")
 
+	// 8b. Delivery method for kiro-cli hooks
+	fmt.Println()
+	fmt.Println("  Hook delivery method:")
+	fmt.Println("    1. Go gRPC binary (recommended — fast, no deps)")
+	fmt.Println("    2. Python HTTP script (fallback — requires Python 3)")
+	hookMethod := prompt("Choice", "1")
+
 	// 9. Register service or scheduled task
 	logFile := filepath.Join(installDir, "service.log")
 
@@ -141,7 +148,38 @@ start "" /B "%s" --model "%s" --port %s --grpc-port %s --data "%s" > "%s" 2>&1
 		fmt.Println("  ✓ Started (background)")
 	}
 
-	// 12. Summary
+	// 12. Install hooks
+	kiroHooksDir := filepath.Join(os.Getenv("USERPROFILE"), ".kiro", "hooks")
+	os.MkdirAll(kiroHooksDir, 0755)
+	if hookMethod == "2" {
+		// Python HTTP hook
+		hookContent := fmt.Sprintf(`"""δ-mem-go store hook (Python HTTP)"""
+import sys, json, urllib.request
+MEMORY_URL = "http://localhost:%s"
+def main():
+    data = json.loads(sys.stdin.read())
+    if data.get("hook_event_name") != "stop": return
+    resp = data.get("assistant_response", "")
+    if len(resp) < 100: return
+    body = json.dumps({"owner": "%s", "key": "hook-auto", "content": resp[:500]}).encode()
+    try: urllib.request.urlopen(urllib.request.Request(MEMORY_URL + "/store", body, {"Content-Type": "application/json"}), timeout=3)
+    except: pass
+if __name__ == "__main__": main()
+`, httpPort, owner)
+		os.WriteFile(filepath.Join(kiroHooksDir, "dmem-store.py"), []byte(hookContent), 0644)
+		fmt.Println("  ✓ Python HTTP hook installed")
+	} else {
+		// Go gRPC hook — copy the compiled hook binary
+		if len(hookBinary) > 0 {
+			os.WriteFile(filepath.Join(kiroHooksDir, "dmem-hook.exe"), hookBinary, 0755)
+			fmt.Println("  ✓ Go gRPC hook installed")
+		} else {
+			fmt.Println("  ⚠ Hook binary not embedded — build with: go build ./scripts/delivery/go-grpc")
+			fmt.Printf("    Then copy to: %s\\dmem-hook.exe\n", kiroHooksDir)
+		}
+	}
+
+	// Summary
 	fmt.Println()
 	fmt.Println("══════════════════════════════════════════════════")
 	fmt.Println("  Installation complete!")

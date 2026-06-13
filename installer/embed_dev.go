@@ -3,3 +3,4 @@
 package main
 
 var agentBinary []byte
+var hookBinary []byte
