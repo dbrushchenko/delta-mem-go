@@ -26,6 +26,9 @@ service DeltaMem {
   rpc StopWander(OwnerRequest) returns (Empty);
   rpc HarvestWander(OwnerRequest) returns (HarvestResponse);
   rpc AddAxiom(AxiomRequest) returns (Empty);
+  rpc Adapt(AdaptRequest) returns (AdaptResponse);
+  rpc Learn(LearnRequest) returns (Empty);
+  rpc Forget(ForgetRequest) returns (Empty);
 }
 
 // Original messages (unchanged)
@@ -138,4 +141,36 @@ message ThinkResponse {
   repeated string neighbors = 3;
   float confidence = 4;
   float novelty = 5;
+  float grounding = 6;
+  int32 depth = 7;
+  bool valid = 8;
+}
+
+message HarvestResponse {
+  repeated ThinkResponse thoughts = 1;
+}
+
+message AxiomRequest {
+  string statement = 1;
+  string domain = 2;
+}
+
+message AdaptRequest {
+  string owner = 1;
+  string wrong = 2;
+  string right = 3;
+}
+
+message AdaptResponse {
+  float impact = 1;
+}
+
+message LearnRequest {
+  string owner = 1;
+  string fact = 2;
+}
+
+message ForgetRequest {
+  string owner = 1;
+  string what = 2;
 }
