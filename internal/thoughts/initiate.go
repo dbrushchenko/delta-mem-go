@@ -37,7 +37,7 @@ type InitResult struct {
 // 3. For each epoch: store chunk, recall with next chunk, compute error,
 //    update projections to maximize recall confidence on related pairs
 func (e *Engine) Initiate(text string, owner string, cfg InitConfig) (*InitResult, error) {
-	if cfg.Epochs == 0 { cfg.Epochs = 3 }
+	if cfg.Epochs == 0 { cfg.Epochs = 5 }
 	if cfg.LearningRate == 0 { cfg.LearningRate = 0.01 }
 	if cfg.ChunkSize == 0 { cfg.ChunkSize = 200 }
 

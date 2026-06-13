@@ -47,7 +47,7 @@ func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo *turbovec.
 		truth:    NewTruthEngine(),
 		wanderer: make(map[string]*Wanderer),
 		MaxDepth:              5,
-		SurpriseThreshold:     0.4,
+		SurpriseThreshold:     0.05, // tuned to real δ-mem confidence range (0.01-0.06)
 		ConvergenceThreshold:  0.95,
 	}
 }
