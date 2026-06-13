@@ -16,13 +16,19 @@ import (
 )
 
 const (
-	defaultInstallDir = `C:\Program Files\DeltaMemGo`
-	serviceName       = "DeltaMemGo"
-	nssmPath          = `C:\Windows\System32\nssm.exe`
-	nssmURL           = "https://nssm.cc/release/nssm-2.24.zip"
-	defaultPort       = "18080"
-	defaultGRPC       = "19090"
+	serviceName = "DeltaMemGo"
+	nssmPath    = `C:\Windows\System32\nssm.exe`
+	nssmURL     = "https://nssm.cc/release/nssm-2.24.zip"
+	defaultPort = "18080"
+	defaultGRPC = "19090"
 )
+
+func defaultInstallDir() string {
+	if isAdmin() {
+		return `C:\Program Files\DeltaMemGo`
+	}
+	return filepath.Join(os.Getenv("APPDATA"), "mem-go")
+}
 
 func main() {
 	fmt.Println("╔══════════════════════════════════════════════════╗")
@@ -31,12 +37,18 @@ func main() {
 	fmt.Println("╚══════════════════════════════════════════════════╝")
 	fmt.Println()
 
-	if !isAdmin() {
-		fatal("This installer must be run as Administrator.\nRight-click and select 'Run as administrator'.")
+	admin := isAdmin()
+	if admin {
+		fmt.Println("  Mode: SYSTEM-WIDE (Administrator)")
+		fmt.Println("  → NSSM service, all users, auto-start on boot")
+	} else {
+		fmt.Println("  Mode: PER-USER (no admin required)")
+		fmt.Println("  → Installed to %APPDATA%, runs at login via scheduled task")
 	}
+	fmt.Println()
 
 	// 1. Install directory
-	installDir := prompt("Install directory", defaultInstallDir)
+	installDir := prompt("Install directory", defaultInstallDir())
 	if err := os.MkdirAll(installDir, 0755); err != nil {
 		fatal("Failed to create directory: %v", err)
 	}
@@ -87,36 +99,47 @@ func main() {
 	// 8. Training data (optional)
 	trainData := prompt("Training data file for initiation (optional, press Enter to skip)", "")
 
-	// 9. Ensure NSSM
-	if _, err := os.Stat(nssmPath); os.IsNotExist(err) {
-		fmt.Println("  Downloading NSSM...")
-		if err := downloadNSSM(); err != nil {
-			fatal("Failed to download NSSM: %v", err)
-		}
-		fmt.Println("  ✓ NSSM installed")
-	} else {
-		fmt.Println("  ✓ NSSM already present")
-	}
-
-	// 10. Register service
+	// 9. Register service or scheduled task
 	logFile := filepath.Join(installDir, "service.log")
-	args := fmt.Sprintf(`"%s" --model "%s" --port %s --grpc-port %s --data "%s"`, exePath, modelPath, httpPort, grpcPort, dataDir)
 
-	nssm("install", serviceName, exePath)
-	nssm("set", serviceName, "AppDirectory", installDir)
-	nssm("set", serviceName, "AppParameters", fmt.Sprintf(`--model "%s" --port %s --grpc-port %s --data "%s"`, modelPath, httpPort, grpcPort, dataDir))
-	nssm("set", serviceName, "DisplayName", "Delta-Mem-Go Thoughts Engine")
-	nssm("set", serviceName, "Description", "Persistent memory + thought synthesis for AI agents. Self-training, truth-constrained, ONNX embeddings.")
-	nssm("set", serviceName, "Start", "SERVICE_AUTO_START")
-	nssm("set", serviceName, "AppStdout", logFile)
-	nssm("set", serviceName, "AppStderr", logFile)
-	nssm("set", serviceName, "AppRotateFiles", "1")
-	nssm("set", serviceName, "AppRotateBytes", "10485760")
-	fmt.Println("  ✓ Service registered")
-
-	// 11. Start
-	nssm("start", serviceName)
-	fmt.Println("  ✓ Service started")
+	if admin {
+		// System-wide: NSSM service
+		if _, err := os.Stat(nssmPath); os.IsNotExist(err) {
+			fmt.Println("  Downloading NSSM...")
+			if err := downloadNSSM(); err != nil {
+				fatal("Failed to download NSSM: %v", err)
+			}
+			fmt.Println("  ✓ NSSM installed")
+		} else {
+			fmt.Println("  ✓ NSSM already present")
+		}
+		nssm("install", serviceName, exePath)
+		nssm("set", serviceName, "AppDirectory", installDir)
+		nssm("set", serviceName, "AppParameters", fmt.Sprintf(`--model "%s" --port %s --grpc-port %s --data "%s"`, modelPath, httpPort, grpcPort, dataDir))
+		nssm("set", serviceName, "DisplayName", "Delta-Mem-Go Thoughts Engine")
+		nssm("set", serviceName, "Description", "Persistent memory + thought synthesis for AI agents.")
+		nssm("set", serviceName, "Start", "SERVICE_AUTO_START")
+		nssm("set", serviceName, "AppStdout", logFile)
+		nssm("set", serviceName, "AppStderr", logFile)
+		nssm("set", serviceName, "AppRotateFiles", "1")
+		nssm("set", serviceName, "AppRotateBytes", "10485760")
+		nssm("start", serviceName)
+		fmt.Println("  ✓ NSSM service registered + started")
+	} else {
+		// Per-user: startup shortcut (no admin needed)
+		startupDir := filepath.Join(os.Getenv("APPDATA"), `Microsoft\Windows\Start Menu\Programs\Startup`)
+		batPath := filepath.Join(startupDir, "delta-mem-go.bat")
+		batContent := fmt.Sprintf(`@echo off
+start "" /B "%s" --model "%s" --port %s --grpc-port %s --data "%s" > "%s" 2>&1
+`, exePath, modelPath, httpPort, grpcPort, dataDir, logFile)
+		os.WriteFile(batPath, []byte(batContent), 0644)
+		fmt.Println("  ✓ Startup shortcut created (runs at login)")
+		// Also start now
+		cmd := exec.Command(exePath, "--model", modelPath, "--port", httpPort, "--grpc-port", grpcPort, "--data", dataDir)
+		cmd.Dir = installDir
+		cmd.Start()
+		fmt.Println("  ✓ Started (background)")
+	}
 
 	// 12. Summary
 	fmt.Println()
@@ -146,8 +169,6 @@ func main() {
 		fmt.Printf("    delta-mem-go.exe --initiate --owner %s --training-data <your-file.txt>\n", owner)
 	}
 	fmt.Println("══════════════════════════════════════════════════")
-
-	_ = args
 }
 
 func isAdmin() bool {
