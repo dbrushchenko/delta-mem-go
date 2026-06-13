@@ -1,8 +1,17 @@
 delta-mem-go
 *.exe
-data/states/*.state
-data/states/*.turbogo
-data/states/*.ibnn.state
-extract_*.txt
 *.onnx
+*.onnx.data
 *.gguf
+extract_*.txt
+
+# Runtime data (per-owner state, generated)
+data/
+
+# Models (large, downloaded separately)
+models/
+
+# Test output
+test_out.txt
+test_err.txt
+*_out.txt
