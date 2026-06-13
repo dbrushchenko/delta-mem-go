@@ -3,11 +3,13 @@ package turbovec
 import (
 	"encoding/gob"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 )
 
 const DedupThreshold = float32(0.92)
@@ -22,6 +24,7 @@ type OwnerManager struct {
 type entry struct {
 	Vec         []float32
 	AccessCount int
+	StoredAt    time.Time
 }
 
 type localIndex struct {
@@ -57,22 +60,29 @@ func (om *OwnerManager) AddVector(owner, id string, vec []float32) error {
 		if dot(vec, e.Vec) > DedupThreshold {
 			// Supersede: replace the old entry with new content, keep access count
 			delete(idx.entries, existingID)
-			idx.entries[id] = &entry{Vec: vec, AccessCount: e.AccessCount}
+			idx.entries[id] = &entry{Vec: vec, AccessCount: e.AccessCount, StoredAt: time.Now()}
 			return nil
 		}
 	}
 
-	idx.entries[id] = &entry{Vec: vec}
+	idx.entries[id] = &entry{Vec: vec, StoredAt: time.Now()}
 	return nil
 }
 
-// SearchVector returns top-k results and bumps access count on each hit.
+// SearchVector returns top-k results with temporal decay (recent = boosted).
 func (om *OwnerManager) SearchVector(owner string, query []float32, k int) ([]string, []float32, error) {
 	idx := om.get(owner)
+	now := time.Now()
 	type scored struct{ id string; s float32 }
 	var results []scored
 	for id, e := range idx.entries {
-		results = append(results, scored{id, dot(query, e.Vec)})
+		sim := dot(query, e.Vec)
+		// Temporal decay: half-life of 7 days. Recent entries boosted up to 20%.
+		age := now.Sub(e.StoredAt).Hours() / 168.0 // weeks
+		recencyBoost := float32(0.2 * math.Exp(-age)) // decays exponentially
+		// Access boost: frequently accessed entries get up to 10% boost
+		accessBoost := float32(math.Min(float64(e.AccessCount)*0.02, 0.1))
+		results = append(results, scored{id, sim + recencyBoost + accessBoost})
 	}
 	ids := make([]string, 0, k); scores := make([]float32, 0, k)
 	for i := 0; i < k && i < len(results); i++ {
