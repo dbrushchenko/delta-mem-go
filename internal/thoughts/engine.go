@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"sync"
 
 	"github.com/dbrushchenko/delta-mem-go/internal/deltamem"
 	"github.com/dbrushchenko/delta-mem-go/internal/gemma"
@@ -158,20 +159,35 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 
 // singlePass is one iteration of the synthesis loop.
 func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, depth int) (*Thought, error) {
-	// Step 1: Embed seeds and store into δ-mem, recall interference pattern
-	var combinedRaw []float32 // raw seed embedding (for retrieval)
+	// Step 1: Embed seeds in parallel
+	type embedResult struct {
+		idx    int
+		hidden []float32
+	}
+	results := make([]embedResult, len(seeds))
+	var wg sync.WaitGroup
+	for i, seed := range seeds {
+		wg.Add(1)
+		go func(idx int, s string) {
+			defer wg.Done()
+			results[idx] = embedResult{idx, embed(s)}
+		}(i, seed)
+	}
+	wg.Wait()
+
+	// Combine embeddings + store into δ-mem, recall interference
+	var combinedRaw []float32
 	var combinedDelta []float32
 	var totalConf float32
-	for _, seed := range seeds {
-		hidden := embed(seed)
-		combinedRaw = vecAdd(combinedRaw, hidden)
-		e.delta.Store(owner, hidden)
-		_, deltaO, conf, err := e.delta.Recall(owner, hidden)
-		if err != nil {
-			return nil, err
-		}
+	for _, r := range results {
+		combinedRaw = vecAdd(combinedRaw, r.hidden)
+		e.delta.Store(owner, r.hidden)
+		e.self.LogStore()
+		_, deltaO, conf, err := e.delta.Recall(owner, r.hidden)
+		if err != nil { return nil, err }
 		combinedDelta = vecAdd(combinedDelta, deltaO)
 		totalConf += conf
+		e.self.LogRecall(conf)
 	}
 	avgConf := totalConf / float32(len(seeds))
 	normalize(combinedRaw)
