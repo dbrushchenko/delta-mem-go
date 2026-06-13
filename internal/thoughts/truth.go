@@ -188,6 +188,18 @@ func (t *TruthEngine) Prove(statement string, confidence float32, source string)
 	})
 }
 
+// Unprove removes a statement from the proven set (used by Undo).
+func (t *TruthEngine) Unprove(statement string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	for i, p := range t.proven {
+		if p.Statement == statement {
+			t.proven = append(t.proven[:i], t.proven[i+1:]...)
+			return
+		}
+	}
+}
+
 // GroundingScore returns how well a thought connects to the truth base.
 func (t *TruthEngine) GroundingScore(thought string) float32 {
 	t.mu.RLock()

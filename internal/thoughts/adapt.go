@@ -81,6 +81,19 @@ func (e *Engine) Learn(ctx context.Context, owner, fact string) error {
 // For the rare case where something must go with no clear replacement,
 // Forget fills the void with a neutral dampener rather than leaving a hole.
 // The region of state space doesn't become empty — it becomes inert.
+// Undo reverses a previous correction. This is Adapt in reverse:
+// the "right" from the original correction becomes "wrong", and the original "wrong" is restored.
+// Also removes the original correction from the proven set.
+func (e *Engine) Undo(ctx context.Context, owner, originalWrong, originalRight string) (*Correction, error) {
+	// Reverse: what was "right" is now wrong, restore the original
+	c, err := e.Adapt(ctx, owner, originalRight, originalWrong)
+	if err != nil { return nil, err }
+	// Remove the original correction from proven truths
+	e.truth.Unprove(originalRight)
+	e.self.LogAdapt()
+	return c, nil
+}
+
 func (e *Engine) Forget(ctx context.Context, owner, what string) error {
 	vec := embed(what)
 	// Don't negate (that creates a void). Instead, overwrite with a

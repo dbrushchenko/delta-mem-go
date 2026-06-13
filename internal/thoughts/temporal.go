@@ -1,6 +1,8 @@
 package thoughts
 
 import (
+	"encoding/gob"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -38,6 +40,39 @@ func NewTemporal() *Temporal {
 
 func NewSelfModel() *SelfModel {
 	return &SelfModel{topicConf: make(map[string]float32), topicCount: make(map[string]int)}
+}
+
+// Save persists self-model state to disk.
+func (sm *SelfModel) Save(path string) error {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	f, err := os.Create(path)
+	if err != nil { return err }
+	defer f.Close()
+	return gob.NewEncoder(f).Encode(struct {
+		TopicConf  map[string]float32
+		TopicCount map[string]int
+		Domains    []domain
+	}{sm.topicConf, sm.topicCount, sm.domains})
+}
+
+// Load restores self-model state from disk.
+func (sm *SelfModel) Load(path string) error {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	f, err := os.Open(path)
+	if err != nil { if os.IsNotExist(err) { return nil }; return err }
+	defer f.Close()
+	var data struct {
+		TopicConf  map[string]float32
+		TopicCount map[string]int
+		Domains    []domain
+	}
+	if err := gob.NewDecoder(f).Decode(&data); err != nil { return err }
+	sm.topicConf = data.TopicConf
+	sm.topicCount = data.TopicCount
+	sm.domains = data.Domains
+	return nil
 }
 
 // Record logs a timestamped event.
@@ -149,9 +184,9 @@ func (c Confidence) String() string {
 
 // domain is an embedding-based knowledge area the system has accumulated.
 type domain struct {
-	centroid []float32
-	conf     float32
-	count    int
+	Centroid []float32
+	Conf     float32
+	Count    int
 }
 
 // AmIConfident checks if the system knows a topic using embedding similarity.
@@ -169,10 +204,10 @@ func (sm *SelfModel) AmIConfident(topicVec []float32) Confidence {
 	var bestSim float32
 	var bestConf float32
 	for _, d := range sm.domains {
-		sim := dotSM(topicVec, d.centroid)
+		sim := dotSM(topicVec, d.Centroid)
 		if sim > bestSim {
 			bestSim = sim
-			bestConf = d.conf
+			bestConf = d.Conf
 		}
 	}
 
@@ -193,14 +228,14 @@ func (sm *SelfModel) LearnDomain(vec []float32, confidence float32) {
 
 	// Find matching domain (cosine > 0.7)
 	for i, d := range sm.domains {
-		if dotSM(vec, d.centroid) > 0.7 {
+		if dotSM(vec, d.Centroid) > 0.7 {
 			// Update centroid (running average)
-			sm.domains[i].count++
-			alpha := 1.0 / float32(sm.domains[i].count)
-			for j := range d.centroid {
-				sm.domains[i].centroid[j] += alpha * (vec[j] - d.centroid[j])
+			sm.domains[i].Count++
+			alpha := 1.0 / float32(sm.domains[i].Count)
+			for j := range d.Centroid {
+				sm.domains[i].Centroid[j] += alpha * (vec[j] - d.Centroid[j])
 			}
-			sm.domains[i].conf += alpha * (confidence - sm.domains[i].conf)
+			sm.domains[i].Conf += alpha * (confidence - sm.domains[i].Conf)
 			return
 		}
 	}
@@ -208,13 +243,13 @@ func (sm *SelfModel) LearnDomain(vec []float32, confidence float32) {
 	// New domain
 	centroid := make([]float32, len(vec))
 	copy(centroid, vec)
-	sm.domains = append(sm.domains, domain{centroid: centroid, conf: confidence, count: 1})
+	sm.domains = append(sm.domains, domain{Centroid: centroid, Conf: confidence, Count: 1})
 
 	// Cap domains (keep top 50 by count)
 	if len(sm.domains) > 50 {
-		minIdx, minCount := 0, sm.domains[0].count
+		minIdx, minCount := 0, sm.domains[0].Count
 		for i, d := range sm.domains {
-			if d.count < minCount { minIdx = i; minCount = d.count }
+			if d.Count < minCount { minIdx = i; minCount = d.Count }
 		}
 		sm.domains[minIdx] = sm.domains[len(sm.domains)-1]
 		sm.domains = sm.domains[:len(sm.domains)-1]
