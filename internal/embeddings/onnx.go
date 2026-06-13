@@ -28,7 +28,12 @@ func Get(modelPath, libPath string) (*Embedder, error) {
 	if libPath == "" {
 		candidates := []string{
 			filepath.Join(filepath.Dir(modelPath), "onnxruntime.dll"),
-			os.Getenv("USERPROFILE") + `\AppData\Roaming\Python\Python312\site-packages\onnxruntime\capi\onnxruntime.dll`,
+			filepath.Join(filepath.Dir(modelPath), "libonnxruntime.so"),
+		}
+		// Platform-specific fallbacks via environment
+		if ortDir := os.Getenv("ORT_LIB_DIR"); ortDir != "" {
+			candidates = append(candidates, filepath.Join(ortDir, "onnxruntime.dll"))
+			candidates = append(candidates, filepath.Join(ortDir, "libonnxruntime.so"))
 		}
 		for _, c := range candidates {
 			if _, err := os.Stat(c); err == nil {
@@ -37,7 +42,7 @@ func Get(modelPath, libPath string) (*Embedder, error) {
 			}
 		}
 		if libPath == "" {
-			return nil, fmt.Errorf("onnxruntime.dll not found")
+			return nil, fmt.Errorf("onnxruntime library not found (set ORT_LIB_DIR or place next to model)")
 		}
 	}
 

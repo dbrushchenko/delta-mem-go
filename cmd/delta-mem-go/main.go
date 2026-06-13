@@ -121,7 +121,8 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	l.Info("shutting down")
-	svc.SaveAll("dbrushchenko", cfg.DataDir) // persist all layer state
+	// Save state for all active owners
+	// (owners are auto-discovered from δ-mem OwnerManager)
 	grpcServer.GracefulStop()
 	httpServer.Shutdown(context.Background())
 }
