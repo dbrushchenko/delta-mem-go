@@ -62,23 +62,20 @@ func (e *Engine) Initiate(text string, owner string, cfg InitConfig) (*InitResul
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for epoch := 0; epoch < cfg.Epochs; epoch++ {
-		// Shuffle order each epoch
 		order := rng.Perm(len(chunks))
 
 		for i := 0; i < len(order)-1; i++ {
 			idx := order[i]
 			nextIdx := order[i+1]
 
-			// Store this chunk
 			mod.Forward(embeddings[idx])
-
-			// Recall with the next chunk (should be somewhat related since it's nearby in text)
 			_, deltaO, _, _ := e.delta.Recall(owner, embeddings[nextIdx])
+			updateProjections(mod, embeddings[idx], embeddings[nextIdx], deltaO, cfg.LearningRate)
 
-			// Compute update signal: the recall output should align with the target embedding.
-			// Error = target - actual. Update projections toward reducing this error.
-			target := embeddings[nextIdx]
-			updateProjections(mod, embeddings[idx], target, deltaO, cfg.LearningRate)
+			// Build self-model domains during initiation
+			if epoch == 0 {
+				e.self.LearnDomain(embeddings[idx], 0.03)
+			}
 		}
 	}
 
