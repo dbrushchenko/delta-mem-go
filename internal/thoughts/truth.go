@@ -72,6 +72,21 @@ func (t *TruthEngine) Validate(ctx context.Context, thought string) *Verdict {
 	embed := embed(thought)
 	verdict := &Verdict{Valid: true, Coherence: 1.0, Grounding: 0.0}
 
+	// Fast path: exact hash match = same text as an axiom = immediately grounded
+	thoughtHash := hashStr(strings.ToLower(strings.TrimSpace(thought)))
+	for _, axiom := range t.axioms {
+		if hashStr(strings.ToLower(strings.TrimSpace(axiom.Statement))) == thoughtHash {
+			verdict.Grounding = 1.0
+			return verdict
+		}
+	}
+	for _, p := range t.proven {
+		if hashStr(strings.ToLower(strings.TrimSpace(p.Statement))) == thoughtHash {
+			verdict.Grounding = p.Confidence
+			return verdict
+		}
+	}
+
 	// Check against axioms — any contradiction is fatal
 	for _, axiom := range t.axioms {
 		sim := cosine(embed, axiom.Embedding)
