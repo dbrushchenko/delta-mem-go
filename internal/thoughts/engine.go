@@ -91,9 +91,6 @@ func (e *Engine) HarvestWander(owner string) []*Thought {
 // Surprise gate: if δ-mem confidence < threshold, something unexpected was found.
 // This triggers deeper processing (more retrieval, more iterations).
 func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thought, error) {
-	if e.gemma == nil {
-		return nil, fmt.Errorf("thoughts engine requires gemma")
-	}
 	if len(seeds) == 0 {
 		return nil, fmt.Errorf("need at least one seed")
 	}
@@ -103,48 +100,46 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 	currentSeeds := seeds
 
 	for depth := 0; depth < e.MaxDepth; depth++ {
-		// Core synthesis pass
 		thought, err := e.singlePass(ctx, owner, currentSeeds, depth)
 		if err != nil {
 			return nil, err
 		}
 
-		// Truth validation — reject thoughts that violate axioms
+		// Truth validation
 		verdict := e.truth.Validate(ctx, thought.Idea)
 		thought.Valid = verdict.Valid
 		thought.Grounding = verdict.Grounding
 		thought.Depth = depth + 1
 
 		if !verdict.Valid {
-			// Truth violation. Don't store. Don't propagate.
-			// Instead, perturb and retry with the contradiction as context.
 			if depth < e.MaxDepth-1 {
 				currentSeeds = append(seeds, "Avoid: "+verdict.Reason)
 				continue
 			}
-			// Final iteration still invalid — return with Valid=false
 			return thought, nil
 		}
 
-		// Convergence check — did we reach a fixed point?
+		// Convergence check
 		ideaEmbed := embed(thought.Idea)
 		if prevEmbedding != nil && cosine(ideaEmbed, prevEmbedding) > e.ConvergenceThreshold {
-			// Converged. This thought is stable. Prove it.
 			e.truth.Prove(thought.Idea, thought.Confidence, "convergence")
 			return thought, nil
 		}
 
-		// Surprise gate — low confidence means unexpected pattern.
-		// Think DEEPER when surprised.
+		// Surprise gate
 		if thought.Confidence >= e.SurpriseThreshold && depth > 0 {
-			// High confidence, not first pass = familiar territory. Done.
 			return thought, nil
 		}
 
-		// Re-entry: the thought becomes the seed for the next cycle
+		// Re-entry: use the combined embedding of neighbors as next seed input
 		prevEmbedding = ideaEmbed
 		lastThought = thought
-		currentSeeds = []string{thought.Idea}
+		// When no Gemma, re-enter with the top neighbor as the next seed
+		if e.gemma == nil && len(thought.Neighbors) > 0 {
+			currentSeeds = thought.Neighbors[:min(len(thought.Neighbors), 3)]
+		} else {
+			currentSeeds = []string{thought.Idea}
+		}
 	}
 
 	return lastThought, nil
@@ -176,9 +171,11 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		k = 8
 	}
 	var neighbors []string
+	var neighborScores []float32
 	if e.turbo != nil {
-		ids, _, _ := e.turbo.SearchVector(owner, combinedRaw, k)
+		ids, scores, _ := e.turbo.SearchVector(owner, combinedRaw, k)
 		neighbors = ids
+		neighborScores = scores
 	}
 
 	// Step 3: IBNN crystallization — normalize δ-mem output first, then sharpen
@@ -195,14 +192,23 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		crystallized = combinedDelta
 	}
 
-	// Step 4: Articulation — IBNN activations inform the prompt
-	prompt := buildThoughtPrompt(seeds, neighbors, topActivations(crystallized, 5))
-	if depth > 0 {
-		prompt += fmt.Sprintf("\n(Iteration %d — go deeper, refine, challenge your previous thought)", depth+1)
-	}
-	idea, err := e.gemma.Generate(ctx, prompt)
-	if err != nil {
-		return nil, fmt.Errorf("generation failed: %w", err)
+	// Step 4: Articulation
+	var idea string
+	if e.gemma != nil {
+		prompt := buildThoughtPrompt(seeds, neighbors, topActivations(crystallized, 5))
+		if depth > 0 {
+			prompt += fmt.Sprintf("\n(Iteration %d — go deeper, refine, challenge your previous thought)", depth+1)
+		}
+		generated, err := e.gemma.Generate(ctx, prompt)
+		if err != nil {
+			return nil, fmt.Errorf("generation failed: %w", err)
+		}
+		idea = generated
+	} else {
+		// No Gemma — the substrate IS the thought.
+		// Compute the centroid of neighbors, find the gap — the thing the system
+		// points toward but doesn't yet contain. That gap is the novel insight.
+		idea = e.synthesizeFromSubstrate(owner, seeds, neighbors, combinedRaw, neighborScores)
 	}
 
 	// Step 5: Novelty
@@ -223,6 +229,83 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		Novelty:    novelty,
 	}, nil
 }
+
+// synthesizeFromSubstrate produces a genuine synthesis from the substrate.
+// It computes the weighted centroid of retrieved neighbors, then searches for
+// what that centroid points toward but isn't yet stored — the gap IS the insight.
+func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string, combinedRaw []float32, scores []float32) string {
+	if len(neighbors) == 0 {
+		return strings.Join(seeds, " + ")
+	}
+
+	// Compute weighted centroid of neighbors
+	centroid := make([]float32, 768)
+	totalWeight := float32(0)
+	for i, n := range neighbors {
+		vec := embed(n)
+		weight := float32(1.0)
+		if i < len(scores) && scores[i] > 0 {
+			weight = scores[i]
+		}
+		for d := range centroid {
+			centroid[d] += vec[d] * weight
+		}
+		totalWeight += weight
+	}
+	if totalWeight > 0 {
+		for d := range centroid {
+			centroid[d] /= totalWeight
+		}
+	}
+	normalize(centroid)
+
+	// The synthesis vector: midpoint between the seed probe and the neighbor centroid.
+	// This points to the INTERSECTION — what the seeds and the retrieved knowledge share.
+	synthesis := make([]float32, len(centroid))
+	for d := range synthesis {
+		synthesis[d] = combinedRaw[d]*0.4 + centroid[d]*0.6 // lean toward what was found
+	}
+	normalize(synthesis)
+
+	// Search turbogo with the synthesis vector — find what it points to
+	// that ISN'T one of the direct neighbors (the gap)
+	neighborSet := make(map[string]bool)
+	for _, n := range neighbors {
+		neighborSet[n] = true
+	}
+
+	var gapInsights []string
+	if e.turbo != nil {
+		ids, gapScores, _ := e.turbo.SearchVector(owner, synthesis, 10)
+		for i, id := range ids {
+			if !neighborSet[id] && gapScores[i] > 0.5 {
+				gapInsights = append(gapInsights, id)
+			}
+			if len(gapInsights) >= 3 {
+				break
+			}
+		}
+	}
+
+	// Build the synthesis: seeds → (what was retrieved) → (what the gap reveals)
+	var b strings.Builder
+	// The retrieved connections
+	top := neighbors
+	if len(top) > 3 {
+		top = top[:3]
+	}
+	b.WriteString(strings.Join(top, " ∩ "))
+
+	// The gap — what the synthesis vector points to but wasn't directly retrieved
+	if len(gapInsights) > 0 {
+		b.WriteString(" → ")
+		b.WriteString(strings.Join(gapInsights, " + "))
+	}
+
+	return b.String()
+}
+
+func min(a, b int) int { if a < b { return a }; return b }
 
 func buildThoughtPrompt(seeds, neighbors []string, activations []int) string {
 	var b strings.Builder
