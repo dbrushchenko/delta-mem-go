@@ -131,6 +131,10 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 		}
 
 		if !verdict.Valid {
+			// IBNN: weaken weights that produced an invalid thought
+			if e.ibnn != nil {
+				e.ibnn.Reinforce(owner, -0.001)
+			}
 			if depth < e.MaxDepth-1 {
 				currentSeeds = append(seeds, "Avoid: "+verdict.Reason)
 				continue
