@@ -1,27 +1,198 @@
-# delta-mem-go
+# δ-mem-go
 
-Production-grade per-owner memory service with nomic-embed-text-v1.5, δ-mem, IBNN, turbogo, and Gemma 4 QAT.
+Persistent memory and thought synthesis engine for AI agents. A 12-layer cognitive architecture that stores knowledge, detects truth, generates novel ideas, and self-trains on every interaction.
 
-## Quick Start
+Written in Go. Single binary. Runs as a Windows service or Kubernetes pod.
 
-```bash
-go mod tidy
-CGO_ENABLED=1 go build -tags cgo -o delta-mem-go ./cmd/delta-mem-go
-./delta-mem-go --port 8080 --grpc-port 9090
+## Key Capabilities
+
+- **Store** — Encode facts into a gated delta-rule memory substrate (20ms)
+- **Recall** — Retrieve and interference-correct against stored knowledge
+- **Think** — Synthesize novel ideas through iterative re-entry across layers (1–4s)
+- **Adapt** — Correct misconceptions without catastrophic forgetting (150ms)
+- **Learn** — Absorb new facts and update domain confidence
+- **Self-train** — Every recall updates projection weights (lr=0.001); IBNN reinforces/weakens on truth pass/fail
+
+## Quick Start (Windows)
+
+### Option A: Installer (recommended)
+
+```powershell
+# Download or build the installer
+.\delta-mem-go-setup.exe
 ```
 
-## Components
+The installer auto-detects admin status:
+- **Administrator** → System-wide NSSM service, auto-start on boot
+- **Standard user** → `%APPDATA%\mem-go`, startup shortcut, no admin required
 
-- **nomic-embed-text-v1.5** — 768-dim Matryoshka embeddings (ONNX)
-- **δ-mem** — gated delta-rule memory
-- **IBNN** — Implicit Bias Neural Network
-- **turbogo** — pure-Go scalar-quantized ANN index
-- **Gemma 4 QAT** — generation via Ollama/llama.cpp
+### Option B: Manual
 
-## Deploy
+```powershell
+# 1. Build
+set CGO_ENABLED=1
+go build -o delta-mem-go.exe ./cmd/delta-mem-go
+
+# 2. Download models to .\models\
+#    - nomic-embed-text-v1.5.onnx + .onnx.data (549 MB)
+#    - onnxruntime.dll (v1.26.0 win-x64)
+#    - nli-deberta.onnx + nli-tokenizer.json (284 MB, optional)
+
+# 3. Run
+.\delta-mem-go.exe --model .\models\nomic-embed-text-v1.5.onnx --port 18080 --grpc-port 19090 --data .\data
+
+# 4. Test
+curl http://localhost:18080/health
+```
+
+## Quick Start (Docker)
 
 ```bash
+# Full stack: delta-mem + ollama (Gemma 4) + turbovec sidecar
 docker compose up --build -d
-# or Kubernetes
-kubectl apply -f k8s/
+
+# Verify
+curl http://localhost:8080/health
 ```
+
+Models must be mounted at `/models`:
+```
+models/
+├── nomic-embed-text-v1.5.onnx
+├── nomic-embed-text-v1.5.onnx.data
+├── nli-deberta.onnx
+├── nli-tokenizer.json
+└── tokenizer.json
+```
+
+## CLI Client
+
+```powershell
+# Build
+go build -o mem-cli.exe ./cmd/mem-cli
+
+# Usage
+mem-cli --addr localhost:19090 store --key "go-concurrency" --content "goroutines are M:N scheduled"
+mem-cli recall "concurrency model in Go"
+mem-cli think "distributed systems" "eventual consistency"
+mem-cli adapt "Python is compiled" "Python is interpreted"
+mem-cli learn "Kubernetes uses etcd for state storage"
+mem-cli health
+```
+
+## API Reference
+
+### HTTP API (default :8080 / Windows :18080)
+
+| Endpoint | Method | Body | Response |
+|----------|--------|------|----------|
+| `/store` | POST | `{"owner","key","content"}` | `{"ok":true,"state_norm":float}` |
+| `/recall` | POST | `{"owner","query"}` | `{"confidence":float,"correction_dim":int}` |
+| `/health` | GET | — | `{"owners_active","avg_state_norm","total_stores","total_recalls","uptime"}` |
+| `/ibnn-forward` | POST | `{"owner","text"}` | `{"output":[float],"dim":int}` |
+| `/turbo-add` | POST | `{"owner","id","vector"}` | `{"ok":true}` |
+| `/turbo-search` | POST | `{"owner","query","k"}` | `{"ids":[],"scores":[]}` |
+| `/generate` | POST | `{"owner","prompt"}` | `{"response":string}` |
+| `/metrics` | GET | — | Prometheus format |
+
+Authentication: `X-API-Key` header (configured via `API_KEYS` env var, comma-separated).
+
+### gRPC API (default :9090 / Windows :19090)
+
+Proto: `proto/deltamem.proto`
+
+```protobuf
+service DeltaMem {
+  rpc Store(StoreRequest) returns (StoreResponse);
+  rpc Recall(RecallRequest) returns (RecallResponse);
+  rpc Think(ThinkRequest) returns (ThinkResponse);
+  rpc Adapt(AdaptRequest) returns (AdaptResponse);
+  rpc Learn(LearnRequest) returns (Empty);
+  rpc Forget(ForgetRequest) returns (Empty);
+  rpc Health(Empty) returns (HealthResponse);
+  rpc StartWander(OwnerRequest) returns (Empty);
+  rpc StopWander(OwnerRequest) returns (Empty);
+  rpc HarvestWander(OwnerRequest) returns (HarvestResponse);
+  rpc IBNNForward(IBNNForwardRequest) returns (IBNNForwardResponse);
+  rpc TurboAdd(TurboAddRequest) returns (TurboAddResponse);
+  rpc TurboSearch(TurboSearchRequest) returns (TurboSearchResponse);
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+}
+```
+
+gRPC auth: `x-api-key` metadata header.
+
+## Architecture Summary
+
+12 processing layers orchestrated by the thoughts engine:
+
+1. **Embeddings** — nomic-embed-text-v1.5, 768-dim, ONNX in-process
+2. **δ-mem** — Gated delta-rule memory (R=64 rank, adaptive expansion)
+3. **IBNN** — Lateral inhibition sharpens dominant patterns
+4. **TurboGo** — 4-bit quantized ANN for fast neighbor retrieval
+5. **Truth Engine** — Heuristic axiom validation + NLI DeBERTa contradiction detection
+6. **Self-Model** — Domain confidence tracking, dynamic thresholds
+7. **Temporal** — Event sequencing and causal ordering
+8. **Adaptation** — Replace-not-remove error correction
+9. **Synthesis** — Substrate gap-finding (centroid → gap → insight)
+10. **Verifier** — Self-consistency checking across iterations
+11. **Wander** — Opportunistic residual-based adjacent discovery
+12. **Iterative Re-entry** — Surprise-gated depth control (max 5 iterations)
+
+## Configuration
+
+Flags:
+```
+--model         Path to nomic ONNX model
+--port          HTTP port (default: 8080)
+--grpc-port     gRPC port (default: 9090)
+--data          State directory (default: ./data/states)
+--embed-dim     Matryoshka dimension, 64–768 (default: 768)
+--rate-limit    Requests/min per owner (default: 1000)
+--log-level     debug|info|warn|error (default: info)
+```
+
+Environment:
+```
+API_KEYS=key1,key2        Comma-separated valid API keys
+DATA_DIR=/data/states     Override --data
+GEMMA_URL=http://...      Ollama endpoint for Gemma 4
+ORT_LIB_DIR=/usr/local/lib  ONNX Runtime library path
+```
+
+## Project Structure
+
+```
+cmd/
+  delta-mem-go/    Server binary
+  mem-cli/         gRPC CLI client
+internal/
+  auth/            API key middleware (HTTP + gRPC)
+  config/          Flag + env configuration
+  deltamem/        δ-mem gated delta-rule module
+  embeddings/      ONNX nomic embedder
+  ibnn/            Inhibition-Based Neural Network
+  nli/             DeBERTa NLI contradiction checker
+  server/          HTTP + gRPC service layer
+  thoughts/        12-layer synthesis engine
+  turbogo/         4-bit quantized ANN index
+  turbovec/        Simple vector store + HTTP sidecar
+  gemma/           Ollama Gemma client
+  metrics/         Prometheus instrumentation
+  observability/   OpenTelemetry tracing
+installer/         Windows installer (NSSM + per-user)
+proto/             Protobuf definitions
+k8s/               Kubernetes manifests (Istio mesh)
+models/            ONNX model files (gitignored)
+data/              Persistent state (gitignored)
+```
+
+## Deployment
+
+- **Windows** — Single `.exe`, NSSM service or startup shortcut
+- **Docker** — `docker compose up --build`
+- **Kubernetes** — `k8s/deployment-full.yaml` (Istio sidecar, Prometheus scrape, PVC-backed)
+
+## License
+
+Internal USGS project. Not for public distribution.
