@@ -44,13 +44,10 @@ func (om *OwnerManager) ForwardBatch(owner string, inputs [][]float32) ([][]floa
 
 
 // Reinforce slightly strengthens the current weights (positive signal from truth validation).
-// Hebbian: weights that produced a valid thought get a micro-boost toward their current values.
 func (om *OwnerManager) Reinforce(owner string, lr float32) {
 	m, err := om.Get(owner)
 	if err != nil { return }
 	m.mu.Lock()
-	defer m.mu.Unlock()
-	// Strengthen non-zero weights slightly (the active pathways were good)
 	for i := range m.Weights {
 		for j := range m.Weights[i] {
 			if m.Weights[i][j] != 0 {
@@ -58,4 +55,7 @@ func (om *OwnerManager) Reinforce(owner string, lr float32) {
 			}
 		}
 	}
+	m.mu.Unlock()
+	statePath := filepath.Join(om.dataDir, owner+".ibnn.state")
+	m.Save(statePath)
 }

@@ -281,9 +281,10 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		idea = generated
 	} else {
 		// No Gemma — the substrate IS the thought.
-		// Compute the centroid of neighbors, find the gap — the thing the system
-		// points toward but doesn't yet contain. That gap is the novel insight.
-		idea = e.synthesizeFromSubstrate(owner, seeds, neighbors, combinedRaw, neighborScores)
+		// IBNN crystallized output weights which neighbors matter most.
+		// Wander events from recent temporal history add adjacent insights.
+		recentWander := e.getRecentWanderInsights(owner)
+		idea = e.synthesizeFromSubstrate(owner, seeds, neighbors, combinedRaw, neighborScores, crystallized, recentWander)
 	}
 
 	// Step 5: Novelty
@@ -329,28 +330,49 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 // It computes the weighted centroid of retrieved neighbors, then searches for
 // what that centroid points toward but isn't yet stored — the gap IS the insight.
 // Extractive validation: every word in output must trace back to stored knowledge.
-func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string, combinedRaw []float32, scores []float32) string {
+func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string, combinedRaw []float32, scores []float32, crystallized []float32, wanderInsights []string) string {
 	if len(neighbors) == 0 {
 		return strings.Join(seeds, " + ")
 	}
 
-	// Compute weighted centroid of neighbors
+	// Use IBNN crystallized activations to weight neighbors:
+	// neighbors whose embeddings align with dominant IBNN dimensions get priority.
+	topDims := topActivations(crystallized, 10)
+	weightedNeighbors := neighbors
+	if len(topDims) > 0 && len(scores) > 0 {
+		// Re-rank neighbors by IBNN alignment
+		type ranked struct{ id string; s float32 }
+		var rn []ranked
+		for i, n := range neighbors {
+			nVec := embed(n)
+			ibnnAlign := float32(0)
+			for _, d := range topDims {
+				if d < len(nVec) { ibnnAlign += nVec[d] * crystallized[d] }
+			}
+			baseScore := float32(0)
+			if i < len(scores) { baseScore = scores[i] }
+			rn = append(rn, ranked{n, baseScore + ibnnAlign*0.3})
+		}
+		// Sort by combined score
+		for i := range rn {
+			for j := i + 1; j < len(rn); j++ {
+				if rn[j].s > rn[i].s { rn[i], rn[j] = rn[j], rn[i] }
+			}
+		}
+		weightedNeighbors = make([]string, len(rn))
+		for i, r := range rn { weightedNeighbors[i] = r.id }
+	}
+
+	// Compute weighted centroid using IBNN-ranked neighbors
 	centroid := make([]float32, 768)
 	totalWeight := float32(0)
-	for i, n := range neighbors {
+	for i, n := range weightedNeighbors {
 		vec := embed(n)
-		weight := float32(1.0)
-		if i < len(scores) && scores[i] > 0 {
-			weight = scores[i]
-		}
-		for d := range centroid {
-			centroid[d] += vec[d] * weight
-		}
+		weight := float32(1.0) / float32(i+1) // rank-decay weighting
+		for d := range centroid { centroid[d] += vec[d] * weight }
 		totalWeight += weight
 	}
-	if totalWeight > 0 {
-		for d := range centroid { centroid[d] /= totalWeight }
-	}
+	if totalWeight > 0 { for d := range centroid { centroid[d] /= totalWeight } }
 	normalize(centroid)
 
 	// Synthesis vector: blend seed probe + neighbor centroid
@@ -375,8 +397,8 @@ func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string
 		}
 	}
 
-	// Build output from validated sources only (extractive — zero hallucination)
-	top := neighbors
+	// Build output: IBNN-ranked neighbors + wander insights (all layers connected)
+	top := weightedNeighbors
 	if len(top) > 3 { top = top[:3] }
 
 	var b strings.Builder
@@ -394,6 +416,11 @@ func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string
 			b.WriteString(" → ")
 			b.WriteString(strings.Join(validated, " + "))
 		}
+	}
+	// Include wander insights (spontaneous adjacent connections)
+	if len(wanderInsights) > 0 {
+		b.WriteString(" ~ ")
+		b.WriteString(strings.Join(wanderInsights[:min(len(wanderInsights), 2)], " + "))
 	}
 	return b.String()
 }
@@ -428,6 +455,18 @@ func isGrounded(output string, sourceVocab map[string]bool) bool {
 }
 
 func min(a, b int) int { if a < b { return a }; return b }
+
+// getRecentWanderInsights pulls wander-tagged temporal events into the synthesis.
+func (e *Engine) getRecentWanderInsights(owner string) []string {
+	events := e.temporal.Recent(owner, 10)
+	var wanders []string
+	for _, ev := range events {
+		if len(ev.ID) > 7 && ev.ID[:7] == "wander:" {
+			wanders = append(wanders, ev.Content)
+		}
+	}
+	return wanders
+}
 
 func buildThoughtPrompt(seeds, neighbors []string, activations []int) string {
 	var b strings.Builder
