@@ -173,6 +173,9 @@ func (m *Module) LoadProjectionsFromArrays(wq, wk, wv [][]float32, wqR, woR [][]
 
 func (m *Module) ResetState() { m.mu.Lock(); m.S = zeroMatrix(m.cfg.R, m.cfg.R); m.mu.Unlock() }
 
+// Cfg returns the module's current configuration (needed for adaptive rank checks).
+func (m *Module) Cfg() Config { return m.cfg }
+
 func (m *Module) SaveState(path string) error {
 	m.mu.Lock(); defer m.mu.Unlock()
 	os.MkdirAll(filepath.Dir(path), 0755)

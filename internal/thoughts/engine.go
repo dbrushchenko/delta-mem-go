@@ -54,7 +54,7 @@ func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo VectorStor
 		self:     NewSelfModel(),
 		wanderer: make(map[string]*Wanderer),
 		MaxDepth:              5,
-		SurpriseThreshold:     0.05, // tuned to real δ-mem confidence range (0.01-0.06)
+		SurpriseThreshold:     0.015, // tuned for sparse recall confidence range
 		ConvergenceThreshold:  0.95,
 	}
 }
@@ -209,14 +209,28 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		combinedRaw = vecAdd(combinedRaw, r.hidden)
 		e.delta.Store(owner, r.hidden)
 		e.self.LogStore()
-		_, deltaO, conf, err := e.delta.Recall(owner, r.hidden)
-		if err != nil { return nil, err }
+
+		// Sparse recall: use top-k rows for cleaner signal (k = R/2)
+		mod, _ := e.delta.Get(owner)
+		var deltaO []float32
+		var conf float32
+		if mod != nil {
+			// Adaptive rank: expand if saturated
+			if mod.ShouldExpand() {
+				mod.ExpandRank(mod.Cfg().R * 2)
+			}
+			_, deltaO = mod.SparseRecall(r.hidden, mod.Cfg().R/2)
+			conf = norm32vec(deltaO)
+		} else {
+			_, deltaO, conf, _ = e.delta.Recall(owner, r.hidden)
+		}
+
 		combinedDelta = vecAdd(combinedDelta, deltaO)
 		totalConf += conf
 		e.self.LogRecall(conf, seeds...)
 		e.self.LearnDomain(r.hidden, conf)
-		// Inline projection training: micro-step toward better recall
-		if mod, err := e.delta.Get(owner); err == nil {
+		// Inline projection training
+		if mod != nil {
 			updateProjections(mod, r.hidden, r.hidden, deltaO, 0.001)
 		}
 	}
@@ -501,4 +515,10 @@ func hashStr(s string) uint64 {
 	h := uint64(14695981039346656037)
 	for _, c := range s { h ^= uint64(c); h *= 1099511628211 }
 	return h
+}
+
+func norm32vec(v []float32) float32 {
+	var s float32
+	for _, x := range v { s += x * x }
+	return float32(math.Sqrt(float64(s)))
 }
