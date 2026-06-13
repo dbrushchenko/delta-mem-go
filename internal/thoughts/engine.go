@@ -36,9 +36,15 @@ type Engine struct {
 	self     *SelfModel
 	wanderer map[string]*Wanderer // per-owner wanderers
 
-	MaxDepth         int     // max re-entry iterations (default 5)
-	SurpriseThreshold float32 // below this confidence = surprise → think deeper
-	ConvergenceThreshold float32 // cosine similarity between iterations to detect fixed point
+	// Verifier is an optional callback that tests a thought against reality.
+	// If set, Think() calls it after generating an idea. If it returns false,
+	// the thought is adapted (corrected) before being stored.
+	// This is the grounding/embodiment hook — the action loop.
+	Verifier func(idea string) (valid bool, correction string)
+
+	MaxDepth         int
+	SurpriseThreshold float32
+	ConvergenceThreshold float32
 }
 
 func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo *turbovec.OwnerManager, gemma *gemma.Client) *Engine {
@@ -129,6 +135,19 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 				continue
 			}
 			return thought, nil
+		}
+
+		// Grounding: if verifier is set, test against reality
+		if e.Verifier != nil {
+			valid, correction := e.Verifier(thought.Idea)
+			if !valid && correction != "" {
+				// Reality says it's wrong — adapt and retry
+				e.Adapt(ctx, owner, thought.Idea, correction)
+				if depth < e.MaxDepth-1 {
+					currentSeeds = []string{correction}
+					continue
+				}
+			}
 		}
 
 		// Convergence check
