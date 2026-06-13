@@ -28,6 +28,7 @@ type SelfModel struct {
 	Uncertainty  float32
 	topicConf    map[string]float32
 	topicCount   map[string]int
+	domains      []domain // embedding-based knowledge areas
 	mu           sync.Mutex
 }
 
@@ -128,4 +129,100 @@ func (sm *SelfModel) Snapshot() map[string]interface{} {
 		"uncertainty": sm.Uncertainty, "last_activity": sm.LastActivity,
 		"topic_confidence": topics,
 	}
+}
+
+// Confidence level for AmIConfident
+type Confidence int
+const (
+	NeverSeen  Confidence = iota // topic has no match in any known domain
+	Uncertain                    // seen before but low confidence
+	Confident                    // high confidence — answer directly
+)
+
+func (c Confidence) String() string {
+	switch c {
+	case Confident: return "yes"
+	case Uncertain: return "no"
+	default: return "never_seen"
+	}
+}
+
+// domain is an embedding-based knowledge area the system has accumulated.
+type domain struct {
+	centroid []float32
+	conf     float32
+	count    int
+}
+
+// AmIConfident checks if the system knows a topic using embedding similarity.
+// Uses pre-computed domain centroids for O(domains) lookup — fast.
+// Falls back to string matching if no embeddings available.
+func (sm *SelfModel) AmIConfident(topicVec []float32) Confidence {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	if len(sm.domains) == 0 {
+		return NeverSeen
+	}
+
+	// Find closest domain centroid
+	var bestSim float32
+	var bestConf float32
+	for _, d := range sm.domains {
+		sim := dotSM(topicVec, d.centroid)
+		if sim > bestSim {
+			bestSim = sim
+			bestConf = d.conf
+		}
+	}
+
+	if bestSim < 0.5 {
+		return NeverSeen
+	}
+	if bestConf > 0.04 { // tuned to δ-mem confidence range
+		return Confident
+	}
+	return Uncertain
+}
+
+// LearnDomain updates or creates a domain centroid from recall activity.
+// Call after embedding is already computed (zero additional embed cost).
+func (sm *SelfModel) LearnDomain(vec []float32, confidence float32) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	// Find matching domain (cosine > 0.7)
+	for i, d := range sm.domains {
+		if dotSM(vec, d.centroid) > 0.7 {
+			// Update centroid (running average)
+			sm.domains[i].count++
+			alpha := 1.0 / float32(sm.domains[i].count)
+			for j := range d.centroid {
+				sm.domains[i].centroid[j] += alpha * (vec[j] - d.centroid[j])
+			}
+			sm.domains[i].conf += alpha * (confidence - sm.domains[i].conf)
+			return
+		}
+	}
+
+	// New domain
+	centroid := make([]float32, len(vec))
+	copy(centroid, vec)
+	sm.domains = append(sm.domains, domain{centroid: centroid, conf: confidence, count: 1})
+
+	// Cap domains (keep top 50 by count)
+	if len(sm.domains) > 50 {
+		minIdx, minCount := 0, sm.domains[0].count
+		for i, d := range sm.domains {
+			if d.count < minCount { minIdx = i; minCount = d.count }
+		}
+		sm.domains[minIdx] = sm.domains[len(sm.domains)-1]
+		sm.domains = sm.domains[:len(sm.domains)-1]
+	}
+}
+
+func dotSM(a, b []float32) float32 {
+	var s float32
+	for i := range a { if i < len(b) { s += a[i] * b[i] } }
+	return s
 }

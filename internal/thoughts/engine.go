@@ -208,6 +208,7 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		combinedDelta = vecAdd(combinedDelta, deltaO)
 		totalConf += conf
 		e.self.LogRecall(conf, seeds...)
+		e.self.LearnDomain(r.hidden, conf)
 	}
 	avgConf := totalConf / float32(len(seeds))
 	normalize(combinedRaw)
