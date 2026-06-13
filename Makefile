@@ -10,6 +10,10 @@ all: build
 build:
 	CGO_ENABLED=1 go build -tags cgo -ldflags "-X main.version=$(VERSION)" -o $(BINARY) ./cmd/delta-mem-go
 
+installer: build
+	cp $(BINARY) installer/delta-mem-go.exe
+	go build -o delta-mem-go-setup.exe ./installer/
+
 test:
 	go test ./... -race -count=1 -v
 
