@@ -157,8 +157,9 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 			return thought, nil
 		}
 
-		// Surprise gate
-		if thought.Confidence >= e.SurpriseThreshold && depth > 0 {
+		// Surprise gate — dynamic threshold from self-model
+		dynThreshold := e.self.SurpriseThresholdFor(seeds, e.SurpriseThreshold)
+		if thought.Confidence >= dynThreshold && depth > 0 {
 			return thought, nil
 		}
 
@@ -206,7 +207,7 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		if err != nil { return nil, err }
 		combinedDelta = vecAdd(combinedDelta, deltaO)
 		totalConf += conf
-		e.self.LogRecall(conf)
+		e.self.LogRecall(conf, seeds...)
 	}
 	avgConf := totalConf / float32(len(seeds))
 	normalize(combinedRaw)
