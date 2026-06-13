@@ -102,6 +102,11 @@ func (e *Engine) Initiate(text string, owner string, cfg InitConfig) (*InitResul
 		}
 	}
 
+	// Attach self-consistency verifier now that knowledge base is populated
+	if e.Verifier == nil {
+		e.Verifier = e.DefaultVerifier(owner)
+	}
+
 	return &InitResult{
 		Chunks:   len(chunks),
 		Epochs:   cfg.Epochs,
