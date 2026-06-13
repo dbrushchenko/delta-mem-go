@@ -101,7 +101,7 @@ func dot(a, b []float32) float32 {
 // ExtractID produces a readable ID from text using entity extraction.
 // Falls back to first 60 chars if no entity found.
 var reServer = regexp.MustCompile(`\b([a-z]{2,}\d{2,}[a-z]*\d*)\b`)
-var reProject = regexp.MustCompile(`\b(kiro-[\w-]+|loggernet-[\w-]+|cawsc-[\w-]+)\b`)
+var reProject = regexp.MustCompile(`\b([a-z]+-[a-z][\w-]*)\b`) // any hyphenated identifier (e.g. delta-mem-go, my-service)
 
 func ExtractID(text string) string {
 	if m := reProject.FindString(text); m != "" { return m }
