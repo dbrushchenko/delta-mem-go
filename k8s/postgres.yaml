@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: delta-mem-secrets
+  namespace: mesh
+type: Opaque
+stringData:
+  postgres-dsn: "postgres://memgo:memgo@delta-mem-pg.mesh.svc:5432/memgo?sslmode=disable"
+  redis-password: ""
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: delta-mem-pg
+  namespace: mesh
+spec:
+  serviceName: delta-mem-pg
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delta-mem-pg
+  template:
+    metadata:
+      labels:
+        app: delta-mem-pg
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "memgo"
+        - name: POSTGRES_USER
+          value: "memgo"
+        - name: POSTGRES_PASSWORD
+          value: "memgo"
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+        volumeMounts:
+        - name: pg-data
+          mountPath: /var/lib/postgresql/data
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "memgo"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: pg-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delta-mem-pg
+  namespace: mesh
+spec:
+  selector:
+    app: delta-mem-pg
+  ports:
+  - port: 5432
+  clusterIP: None
