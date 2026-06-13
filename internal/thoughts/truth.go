@@ -116,12 +116,18 @@ func (t *TruthEngine) Validate(ctx context.Context, thought string) *Verdict {
 			}
 			// Heuristic didn't catch it. If NLI available and sim < 0.97, get second opinion.
 			if t.nli != nil && sim < 0.97 {
-				label, conf := t.nli.Check(thought, axiom.Statement)
-				if label == "contradiction" && conf > 0.7 {
-					verdict.Valid = false
-					verdict.Contradictions = append(verdict.Contradictions, axiom.Statement)
-					verdict.Reason = "NLI contradiction: " + axiom.Statement
-					return verdict
+				// Pre-processing: truncate to 256 chars (model max context)
+				tA := thought; if len(tA) > 256 { tA = tA[:256] }
+				tB := axiom.Statement; if len(tB) > 256 { tB = tB[:256] }
+				// False positive mitigation: skip temporal changes ("was" vs "is")
+				if !isTemporalChange(thought, axiom.Statement) {
+					label, conf := t.nli.Check(tA, tB)
+					if label == "contradiction" && conf > 0.6 {
+						verdict.Valid = false
+						verdict.Contradictions = append(verdict.Contradictions, axiom.Statement)
+						verdict.Reason = "NLI contradiction: " + axiom.Statement
+						return verdict
+					}
 				}
 			}
 			// Not an inversion — it agrees
@@ -265,3 +271,14 @@ func extractNouns(s string, skip map[string]bool) []string {
 
 func maxF(a, b float32) float32 { return float32(math.Max(float64(a), float64(b))) }
 func minF(a, b float32) float32 { return float32(math.Min(float64(a), float64(b))) }
+
+// isTemporalChange detects "was X" vs "is Y" patterns — these are state changes, not contradictions.
+func isTemporalChange(a, b string) bool {
+	al := strings.ToLower(a)
+	bl := strings.ToLower(b)
+	aHasWas := strings.Contains(al, " was ") || strings.Contains(al, " were ")
+	bHasIs := strings.Contains(bl, " is ") || strings.Contains(bl, " are ")
+	bHasWas := strings.Contains(bl, " was ") || strings.Contains(bl, " were ")
+	aHasIs := strings.Contains(al, " is ") || strings.Contains(al, " are ")
+	return (aHasWas && bHasIs) || (bHasWas && aHasIs)
+}
