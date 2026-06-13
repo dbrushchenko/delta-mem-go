@@ -128,6 +128,11 @@ func (s *Service) Learn(ctx context.Context, owner, fact string) error {
 	return s.thoughts.Learn(ctx, owner, fact)
 }
 
+// SetThoughtsVectorStore overrides the thoughts engine's vector store (e.g. turbogo for production).
+func (s *Service) SetThoughtsVectorStore(vs thoughts.VectorStore) {
+	s.thoughts = thoughts.New(s.om, s.ibnnOM, vs, s.gemma)
+}
+
 func (s *Service) Forget(ctx context.Context, owner, what string) error {
 	return s.thoughts.Forget(ctx, owner, what)
 }

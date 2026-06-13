@@ -29,17 +29,13 @@ type Thought struct {
 type Engine struct {
 	delta    *deltamem.OwnerManager
 	ibnn     *ibnn.OwnerManager
-	turbo    *turbovec.OwnerManager
+	turbo    VectorStore
 	gemma    *gemma.Client
 	truth    *TruthEngine
 	temporal *Temporal
 	self     *SelfModel
-	wanderer map[string]*Wanderer // per-owner wanderers
+	wanderer map[string]*Wanderer
 
-	// Verifier is an optional callback that tests a thought against reality.
-	// If set, Think() calls it after generating an idea. If it returns false,
-	// the thought is adapted (corrected) before being stored.
-	// This is the grounding/embodiment hook — the action loop.
 	Verifier func(idea string) (valid bool, correction string)
 
 	MaxDepth         int
@@ -47,7 +43,7 @@ type Engine struct {
 	ConvergenceThreshold float32
 }
 
-func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo *turbovec.OwnerManager, gemma *gemma.Client) *Engine {
+func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo VectorStore, gemma *gemma.Client) *Engine {
 	return &Engine{
 		delta:    delta,
 		ibnn:     ibnn,

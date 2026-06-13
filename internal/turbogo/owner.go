@@ -68,3 +68,13 @@ func (om *OwnerManager) SearchVector(owner string, query []float32, k int) ([]st
 	}
 	return idx.Search(query, k)
 }
+
+
+func (om *OwnerManager) RemoveVector(owner, id string) {
+	idx, err := om.Get(owner)
+	if err != nil { return }
+	idx.Delete(id)
+	om.mu.RLock()
+	defer om.mu.RUnlock()
+	om.save(owner)
+}
