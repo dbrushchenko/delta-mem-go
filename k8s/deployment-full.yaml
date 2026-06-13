@@ -54,8 +54,6 @@ spec:
             cpu: "2"
             memory: "4Gi"
         volumeMounts:
-        - name: data
-          mountPath: /data
         - name: models
           mountPath: /models
         readinessProbe:
@@ -69,9 +67,6 @@ spec:
             port: 8080
           periodSeconds: 30
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: delta-mem-data
       - name: models
         persistentVolumeClaim:
           claimName: delta-mem-models
