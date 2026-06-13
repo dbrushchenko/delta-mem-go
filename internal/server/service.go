@@ -133,6 +133,11 @@ func (s *Service) SetThoughtsVectorStore(vs thoughts.VectorStore) {
 	s.thoughts = thoughts.New(s.om, s.ibnnOM, vs, s.gemma)
 }
 
+// SetNLI attaches an NLI checker to the truth engine for second-opinion contradiction detection.
+func (s *Service) SetNLI(checker thoughts.NLIChecker) {
+	s.thoughts.Truth().SetNLI(checker)
+}
+
 func (s *Service) Forget(ctx context.Context, owner, what string) error {
 	return s.thoughts.Forget(ctx, owner, what)
 }
