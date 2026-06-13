@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"path/filepath"
 	"time"
 
 	"github.com/dbrushchenko/delta-mem-go/internal/deltamem"
@@ -43,13 +44,15 @@ func (s *Service) Store(ctx context.Context, owner, key, content string) (float3
 	if s.om != nil {
 		norm, err := s.om.Store(owner, hidden)
 		if err != nil { return 0, err }
-		// Also index in turbogo for retrieval
+		// Index for retrieval
 		if s.turboOM != nil {
 			id := key
 			if len(id) > 60 { id = id[:60] }
 			s.turboOM.AddVector(owner, id, hidden)
 			s.turboOM.Save(owner)
 		}
+		// Self-model learns from every store
+		s.thoughts.Self().LearnDomain(hidden, 0.03)
 		return norm, nil
 	}
 	return 1.0, nil
@@ -147,6 +150,13 @@ func (s *Service) SetThoughtsVectorStore(vs thoughts.VectorStore) {
 // SetNLI attaches an NLI checker to the truth engine for second-opinion contradiction detection.
 func (s *Service) SetNLI(checker thoughts.NLIChecker) {
 	s.thoughts.Truth().SetNLI(checker)
+}
+
+// SaveAll persists all layer state to disk. Call on shutdown or periodically.
+func (s *Service) SaveAll(owner, dataDir string) {
+	s.thoughts.Self().Save(filepath.Join(dataDir, owner+".self"))
+	if s.turboOM != nil { s.turboOM.Save(owner) }
+	if s.om != nil { s.om.Save(owner) }
 }
 
 func (s *Service) Forget(ctx context.Context, owner, what string) error {

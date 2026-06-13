@@ -121,6 +121,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	l.Info("shutting down")
+	svc.SaveAll("dbrushchenko", cfg.DataDir) // persist all layer state
 	grpcServer.GracefulStop()
 	httpServer.Shutdown(context.Background())
 }
