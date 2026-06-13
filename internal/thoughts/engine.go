@@ -233,6 +233,7 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 // synthesizeFromSubstrate produces a genuine synthesis from the substrate.
 // It computes the weighted centroid of retrieved neighbors, then searches for
 // what that centroid points toward but isn't yet stored — the gap IS the insight.
+// Extractive validation: every word in output must trace back to stored knowledge.
 func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string, combinedRaw []float32, scores []float32) string {
 	if len(neighbors) == 0 {
 		return strings.Join(seeds, " + ")
@@ -253,26 +254,20 @@ func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string
 		totalWeight += weight
 	}
 	if totalWeight > 0 {
-		for d := range centroid {
-			centroid[d] /= totalWeight
-		}
+		for d := range centroid { centroid[d] /= totalWeight }
 	}
 	normalize(centroid)
 
-	// The synthesis vector: midpoint between the seed probe and the neighbor centroid.
-	// This points to the INTERSECTION — what the seeds and the retrieved knowledge share.
+	// Synthesis vector: blend seed probe + neighbor centroid
 	synthesis := make([]float32, len(centroid))
 	for d := range synthesis {
-		synthesis[d] = combinedRaw[d]*0.4 + centroid[d]*0.6 // lean toward what was found
+		synthesis[d] = combinedRaw[d]*0.4 + centroid[d]*0.6
 	}
 	normalize(synthesis)
 
-	// Search turbogo with the synthesis vector — find what it points to
-	// that ISN'T one of the direct neighbors (the gap)
+	// Find the gap: what synthesis points to that isn't a direct neighbor
 	neighborSet := make(map[string]bool)
-	for _, n := range neighbors {
-		neighborSet[n] = true
-	}
+	for _, n := range neighbors { neighborSet[n] = true }
 
 	var gapInsights []string
 	if e.turbo != nil {
@@ -281,28 +276,60 @@ func (e *Engine) synthesizeFromSubstrate(owner string, seeds, neighbors []string
 			if !neighborSet[id] && gapScores[i] > 0.5 {
 				gapInsights = append(gapInsights, id)
 			}
-			if len(gapInsights) >= 3 {
-				break
-			}
+			if len(gapInsights) >= 3 { break }
 		}
 	}
 
-	// Build the synthesis: seeds → (what was retrieved) → (what the gap reveals)
-	var b strings.Builder
-	// The retrieved connections
+	// Build output from validated sources only (extractive — zero hallucination)
 	top := neighbors
-	if len(top) > 3 {
-		top = top[:3]
-	}
+	if len(top) > 3 { top = top[:3] }
+
+	var b strings.Builder
 	b.WriteString(strings.Join(top, " ∩ "))
-
-	// The gap — what the synthesis vector points to but wasn't directly retrieved
 	if len(gapInsights) > 0 {
-		b.WriteString(" → ")
-		b.WriteString(strings.Join(gapInsights, " + "))
+		// Validate: gap insights must share vocabulary with seeds+neighbors (grounding)
+		sourceVocab := buildVocab(append(seeds, neighbors...))
+		var validated []string
+		for _, g := range gapInsights {
+			if isGrounded(g, sourceVocab) {
+				validated = append(validated, g)
+			}
+		}
+		if len(validated) > 0 {
+			b.WriteString(" → ")
+			b.WriteString(strings.Join(validated, " + "))
+		}
 	}
-
 	return b.String()
+}
+
+// buildVocab extracts all 4+ char words from a set of strings.
+func buildVocab(texts []string) map[string]bool {
+	vocab := make(map[string]bool)
+	for _, t := range texts {
+		for _, w := range strings.Fields(strings.ToLower(t)) {
+			if len(w) >= 4 {
+				vocab[w] = true
+			}
+		}
+	}
+	return vocab
+}
+
+// isGrounded checks that a synthesis output shares significant vocabulary with sources.
+// At least 30% of its 4+ char words must appear in the source vocab.
+func isGrounded(output string, sourceVocab map[string]bool) bool {
+	words := strings.Fields(strings.ToLower(output))
+	if len(words) == 0 { return false }
+	total, found := 0, 0
+	for _, w := range words {
+		if len(w) >= 4 {
+			total++
+			if sourceVocab[w] { found++ }
+		}
+	}
+	if total == 0 { return true }
+	return float64(found)/float64(total) >= 0.3
 }
 
 func min(a, b int) int { if a < b { return a }; return b }
