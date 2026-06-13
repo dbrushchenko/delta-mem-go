@@ -125,6 +125,11 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 		thought.Grounding = verdict.Grounding
 		thought.Depth = depth + 1
 
+		// IBNN inline learning: reinforce weights that produced valid thoughts
+		if verdict.Valid && e.ibnn != nil {
+			e.ibnn.Reinforce(owner, 0.001)
+		}
+
 		if !verdict.Valid {
 			if depth < e.MaxDepth-1 {
 				currentSeeds = append(seeds, "Avoid: "+verdict.Reason)
@@ -192,6 +197,7 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 	wg.Wait()
 
 	// Combine embeddings + store into δ-mem, recall interference
+	// Inline micro-learning: every recall trains projections slightly
 	var combinedRaw []float32
 	var combinedDelta []float32
 	var totalConf float32
@@ -205,6 +211,10 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 		totalConf += conf
 		e.self.LogRecall(conf, seeds...)
 		e.self.LearnDomain(r.hidden, conf)
+		// Inline projection training: micro-step toward better recall
+		if mod, err := e.delta.Get(owner); err == nil {
+			updateProjections(mod, r.hidden, r.hidden, deltaO, 0.001)
+		}
 	}
 	avgConf := totalConf / float32(len(seeds))
 	normalize(combinedRaw)
