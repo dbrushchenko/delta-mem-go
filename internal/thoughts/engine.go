@@ -199,10 +199,13 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 	}
 	var neighbors []string
 	var neighborScores []float32
+	var neighborSet map[string]bool
 	if e.turbo != nil {
 		ids, scores, _ := e.turbo.SearchVector(owner, combinedRaw, k)
 		neighbors = ids
 		neighborScores = scores
+		neighborSet = make(map[string]bool)
+		for _, n := range neighbors { neighborSet[n] = true }
 	}
 
 	// Step 3: IBNN crystallization — normalize δ-mem output first, then sharpen
@@ -240,6 +243,23 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 
 	// Step 5: Novelty
 	novelty := computeNovelty(idea, seeds)
+
+	// Opportunistic wander: check if the δ-mem residual (what wasn't used)
+	// crosses salience. Free — computation already done, just check threshold.
+	if e.turbo != nil && avgConf > 0.03 {
+		// The difference between raw probe and what δ-mem returned = residual
+		residual := make([]float32, len(combinedRaw))
+		for d := range residual { residual[d] = combinedRaw[d] - combinedDelta[d] }
+		normalize(residual)
+		// Search with residual — what is "nearby but not recalled"?
+		wanderIDs, wanderScores, _ := e.turbo.SearchVector(owner, residual, 2)
+		for i, wid := range wanderIDs {
+			if wanderScores[i] > 0.6 && !neighborSet[wid] {
+				// Spontaneous adjacent insight — record it
+				e.temporal.Record(owner, "wander:"+wid, wid)
+			}
+		}
+	}
 
 	// Store back + temporal record
 	thoughtHidden := embed(idea)
