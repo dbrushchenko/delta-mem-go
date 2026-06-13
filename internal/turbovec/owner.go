@@ -1,7 +1,10 @@
 package turbovec
 
 import (
+	"encoding/gob"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -11,22 +14,25 @@ const DedupThreshold = float32(0.92)
 
 type OwnerManager struct {
 	dim     int
+	dataDir string
 	indexes map[string]*localIndex
 	mu      sync.RWMutex
 }
 
 type entry struct {
-	vec         []float32
-	accessCount int
+	Vec         []float32
+	AccessCount int
 }
 
 type localIndex struct {
 	entries map[string]*entry
 }
 
-func NewOwnerManager(dim int) *OwnerManager {
+func NewOwnerManager(dim int, dataDir ...string) *OwnerManager {
 	if dim == 0 { dim = 768 }
-	return &OwnerManager{dim: dim, indexes: make(map[string]*localIndex)}
+	dir := ""
+	if len(dataDir) > 0 { dir = dataDir[0] }
+	return &OwnerManager{dim: dim, dataDir: dir, indexes: make(map[string]*localIndex)}
 }
 
 func (om *OwnerManager) get(owner string) *localIndex {
@@ -48,15 +54,15 @@ func (om *OwnerManager) AddVector(owner, id string, vec []float32) error {
 
 	// Inline dedup: check if near-duplicate exists
 	for existingID, e := range idx.entries {
-		if dot(vec, e.vec) > DedupThreshold {
+		if dot(vec, e.Vec) > DedupThreshold {
 			// Supersede: replace the old entry with new content, keep access count
 			delete(idx.entries, existingID)
-			idx.entries[id] = &entry{vec: vec, accessCount: e.accessCount}
+			idx.entries[id] = &entry{Vec: vec, AccessCount: e.AccessCount}
 			return nil
 		}
 	}
 
-	idx.entries[id] = &entry{vec: vec}
+	idx.entries[id] = &entry{Vec: vec}
 	return nil
 }
 
@@ -66,9 +72,8 @@ func (om *OwnerManager) SearchVector(owner string, query []float32, k int) ([]st
 	type scored struct{ id string; s float32 }
 	var results []scored
 	for id, e := range idx.entries {
-		results = append(results, scored{id, dot(query, e.vec)})
+		results = append(results, scored{id, dot(query, e.Vec)})
 	}
-	// Top-k selection
 	ids := make([]string, 0, k); scores := make([]float32, 0, k)
 	for i := 0; i < k && i < len(results); i++ {
 		best := i
@@ -76,8 +81,7 @@ func (om *OwnerManager) SearchVector(owner string, query []float32, k int) ([]st
 		results[i], results[best] = results[best], results[i]
 		ids = append(ids, results[i].id)
 		scores = append(scores, results[i].s)
-		// Bump access count on retrieval
-		if e, ok := idx.entries[results[i].id]; ok { e.accessCount++ }
+		if e, ok := idx.entries[results[i].id]; ok { e.AccessCount++ }
 	}
 	return ids, scores, nil
 }
@@ -87,9 +91,30 @@ func (om *OwnerManager) RemoveVector(owner, id string) {
 	delete(idx.entries, id)
 }
 
-// Count returns total entries for an owner.
 func (om *OwnerManager) Count(owner string) int {
 	return len(om.get(owner).entries)
+}
+
+// Save persists the index to disk.
+func (om *OwnerManager) Save(owner string) error {
+	if om.dataDir == "" { return nil }
+	idx := om.get(owner)
+	os.MkdirAll(om.dataDir, 0755)
+	f, err := os.Create(filepath.Join(om.dataDir, owner+".turbo"))
+	if err != nil { return err }
+	defer f.Close()
+	return gob.NewEncoder(f).Encode(idx.entries)
+}
+
+// Load restores the index from disk.
+func (om *OwnerManager) Load(owner string) error {
+	if om.dataDir == "" { return nil }
+	path := filepath.Join(om.dataDir, owner+".turbo")
+	f, err := os.Open(path)
+	if err != nil { if os.IsNotExist(err) { return nil }; return err }
+	defer f.Close()
+	idx := om.get(owner)
+	return gob.NewDecoder(f).Decode(&idx.entries)
 }
 
 func dot(a, b []float32) float32 {

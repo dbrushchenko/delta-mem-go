@@ -31,6 +31,8 @@ type Engine struct {
 	turbo    *turbovec.OwnerManager
 	gemma    *gemma.Client
 	truth    *TruthEngine
+	temporal *Temporal
+	self     *SelfModel
 	wanderer map[string]*Wanderer // per-owner wanderers
 
 	MaxDepth         int     // max re-entry iterations (default 5)
@@ -45,6 +47,8 @@ func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo *turbovec.
 		turbo:    turbo,
 		gemma:    gemma,
 		truth:    NewTruthEngine(),
+		temporal: NewTemporal(),
+		self:     NewSelfModel(),
 		wanderer: make(map[string]*Wanderer),
 		MaxDepth:              5,
 		SurpriseThreshold:     0.05, // tuned to real δ-mem confidence range (0.01-0.06)
@@ -54,6 +58,12 @@ func New(delta *deltamem.OwnerManager, ibnn *ibnn.OwnerManager, turbo *turbovec.
 
 // Truth returns the truth engine for external axiom registration.
 func (e *Engine) Truth() *TruthEngine { return e.truth }
+
+// Temporal returns the temporal tracker.
+func (e *Engine) Temporal() *Temporal { return e.temporal }
+
+// Self returns the self-model.
+func (e *Engine) Self() *SelfModel { return e.self }
 
 // StartWander begins spontaneous thought for an owner.
 func (e *Engine) StartWander(owner string) {
@@ -94,6 +104,7 @@ func (e *Engine) Think(ctx context.Context, owner string, seeds []string) (*Thou
 	if len(seeds) == 0 {
 		return nil, fmt.Errorf("need at least one seed")
 	}
+	e.self.LogThink()
 
 	var prevEmbedding []float32
 	var lastThought *Thought
@@ -214,11 +225,14 @@ func (e *Engine) singlePass(ctx context.Context, owner string, seeds []string, d
 	// Step 5: Novelty
 	novelty := computeNovelty(idea, seeds)
 
-	// Store back
+	// Store back + temporal record
 	thoughtHidden := embed(idea)
 	e.delta.Store(owner, thoughtHidden)
+	e.self.LogStore()
 	if e.turbo != nil {
-		e.turbo.AddVector(owner, turbovec.ExtractID(idea), thoughtHidden)
+		id := turbovec.ExtractID(idea)
+		e.turbo.AddVector(owner, id, thoughtHidden)
+		e.temporal.Record(owner, id, idea)
 	}
 
 	return &Thought{

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dbrushchenko/delta-mem-go/internal/deltamem"
+	"github.com/dbrushchenko/delta-mem-go/internal/embeddings"
 	"github.com/dbrushchenko/delta-mem-go/internal/gemma"
 	"github.com/dbrushchenko/delta-mem-go/internal/ibnn"
 	"github.com/dbrushchenko/delta-mem-go/internal/thoughts"
@@ -22,25 +23,29 @@ type Service struct {
 	gemma       *gemma.Client
 	turbovecCli *turbovec.Client
 	thoughts    *thoughts.Engine
+	embedder    *embeddings.Embedder
 	started     time.Time
 }
 
-func New(deltaOM *deltamem.OwnerManager, ibnnOM *ibnn.OwnerManager, turboOM *turbovec.OwnerManager, gemmaClient *gemma.Client, turbovecClient *turbovec.Client) *Service {
+func New(deltaOM *deltamem.OwnerManager, ibnnOM *ibnn.OwnerManager, turboOM *turbovec.OwnerManager, gemmaClient *gemma.Client, turbovecClient *turbovec.Client, emb ...*embeddings.Embedder) *Service {
+	var e *embeddings.Embedder
+	if len(emb) > 0 { e = emb[0] }
 	return &Service{
 		om: deltaOM, ibnnOM: ibnnOM, turboOM: turboOM, gemma: gemmaClient, turbovecCli: turbovecClient,
 		thoughts: thoughts.New(deltaOM, ibnnOM, turboOM, gemmaClient),
+		embedder: e,
 		started:  time.Now(),
 	}
 }
 
 func (s *Service) Store(ctx context.Context, owner, key, content string) (float32, error) {
-	hidden := textToHidden(key + " " + content)
+	hidden := s.embed(key + " " + content)
 	if s.om != nil { return s.om.Store(owner, hidden) }
 	return 1.0, nil
 }
 
 func (s *Service) Recall(ctx context.Context, owner, query string) ([]float32, float32, error) {
-	hidden := textToHidden(query)
+	hidden := s.embed(query)
 	if s.om != nil { _, deltaO, conf, err := s.om.Recall(owner, hidden); return deltaO, conf, err }
 	return nil, 0, nil
 }
@@ -66,7 +71,7 @@ func (s *Service) ResetState(ctx context.Context, owner string) error {
 }
 
 func (s *Service) IBNNForward(ctx context.Context, owner, text string) ([]float32, error) {
-	hidden := textToHidden(text)
+	hidden := s.embed(text)
 	if s.ibnnOM != nil { out, err := s.ibnnOM.ForwardBatch(owner, [][]float32{hidden}); if err != nil { return nil, err }; return out[0], nil }
 	return hidden, nil
 }
@@ -127,7 +132,11 @@ func (s *Service) Forget(ctx context.Context, owner, what string) error {
 	return s.thoughts.Forget(ctx, owner, what)
 }
 
-func textToHidden(text string) []float32 {
+// embed uses real embeddings if available, falls back to hash.
+func (s *Service) embed(text string) []float32 {
+	if s.embedder != nil {
+		return s.embedder.EmbedText(text)
+	}
 	hidden := make([]float32, Dimensions)
 	seed := uint64(0)
 	for _, c := range text { seed = seed*31 + uint64(c) }
