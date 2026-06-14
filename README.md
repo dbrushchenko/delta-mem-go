@@ -71,13 +71,21 @@ models/
 # Build
 go build -o mem-cli.exe ./cmd/mem-cli
 
-# Usage
-mem-cli --addr localhost:19090 store --key "go-concurrency" --content "goroutines are M:N scheduled"
+# Core
+mem-cli store --key "go-concurrency" --content "goroutines are M:N scheduled"
+mem-cli store-deep --key "k8s-mesh" --content "compute mesh uses Flagger canary"
 mem-cli recall "concurrency model in Go"
 mem-cli think "distributed systems" "eventual consistency"
 mem-cli adapt "Python is compiled" "Python is interpreted"
 mem-cli learn "Kubernetes uses etcd for state storage"
+mem-cli forget "outdated fact"
 mem-cli health
+
+# New (full-pipeline)
+mem-cli search-deep "data collection kubernetes"
+mem-cli validate "LoggerNet runs on Kubernetes pods"
+mem-cli temporal 20
+mem-cli confident "LoRaWAN IoT sensors"
 ```
 
 ## API Reference
@@ -103,6 +111,7 @@ Proto: `proto/deltamem.proto`
 
 ```protobuf
 service DeltaMem {
+  // Core
   rpc Store(StoreRequest) returns (StoreResponse);
   rpc Recall(RecallRequest) returns (RecallResponse);
   rpc Think(ThinkRequest) returns (ThinkResponse);
@@ -110,17 +119,63 @@ service DeltaMem {
   rpc Learn(LearnRequest) returns (Empty);
   rpc Forget(ForgetRequest) returns (Empty);
   rpc Health(Empty) returns (HealthResponse);
-  rpc StartWander(OwnerRequest) returns (Empty);
-  rpc StopWander(OwnerRequest) returns (Empty);
-  rpc HarvestWander(OwnerRequest) returns (HarvestResponse);
+
+  // Vector stores
   rpc IBNNForward(IBNNForwardRequest) returns (IBNNForwardResponse);
+  rpc IBNNForwardHidden(IBNNForwardHiddenRequest) returns (IBNNForwardResponse);
   rpc TurboAdd(TurboAddRequest) returns (TurboAddResponse);
   rpc TurboSearch(TurboSearchRequest) returns (TurboSearchResponse);
   rpc Generate(GenerateRequest) returns (GenerateResponse);
+
+  // Wander
+  rpc StartWander(OwnerRequest) returns (Empty);
+  rpc StopWander(OwnerRequest) returns (Empty);
+  rpc HarvestWander(OwnerRequest) returns (HarvestResponse);
+  rpc AddAxiom(AxiomRequest) returns (Empty);
+
+  // Full-pipeline (added 2026-06-14)
+  rpc StoreDeep(StoreRequest) returns (StoreDeepResponse);
+  rpc TurbogoSearch(TurboSearchRequest) returns (TurboSearchResponse);
+  rpc Validate(ValidateRequest) returns (ValidateResponse);
+  rpc QueryTemporal(TemporalRequest) returns (TemporalResponse);
+  rpc AmIConfident(ConfidenceRequest) returns (ConfidenceResponse);
 }
 ```
 
 gRPC auth: `x-api-key` metadata header.
+
+### MCP API (POST /mcp on HTTP port)
+
+JSON-RPC 2.0 over HTTP POST. Same port as REST API. Protected by same `X-API-Key`.
+
+Agent config (mesh):
+```json
+{ "dmem": { "url": "https://dmem.mesh.gs.doi.net/mcp" } }
+```
+
+Agent config (localhost, no auth):
+```json
+{ "dmem": { "url": "http://localhost:18080/mcp" } }
+```
+
+14 tools exposed:
+
+| Tool | Description |
+|------|-------------|
+| `dmem_store` | Store fact (embed → δ-mem → turbovec → self-model) |
+| `dmem_store_deep` | Store ALL layers (Store + Learn in one call) |
+| `dmem_recall` | Query δ-mem confidence (triggers self-training) |
+| `dmem_learn` | Absorb deeply (thoughts engine path) |
+| `dmem_think` | Full 12-layer synthesis (Gemma + Wander included) |
+| `dmem_adapt` | Correct misconception (replace-not-remove) |
+| `dmem_forget` | Decay a memory |
+| `dmem_validate` | Truth engine check (axioms + NLI) |
+| `dmem_search` | Vector search (turbovec or turbogo) |
+| `dmem_confident` | Self-model confidence check |
+| `dmem_temporal` | Query recent events |
+| `dmem_wander` | Start/stop/harvest spontaneous thoughts |
+| `dmem_axiom` | Set immutable truth |
+| `dmem_health` | Server status |
 
 ## Architecture Summary
 
@@ -164,24 +219,27 @@ ORT_LIB_DIR=/usr/local/lib  ONNX Runtime library path
 
 ```
 cmd/
-  delta-mem-go/    Server binary
+  delta-mem-go/    Server binary (HTTP + gRPC + MCP)
   mem-cli/         gRPC CLI client
 internal/
   auth/            API key middleware (HTTP + gRPC)
   config/          Flag + env configuration
-  deltamem/        δ-mem gated delta-rule module
+  deltamem/        δ-mem gated delta-rule module (MultiRes: hot/warm/cold)
   embeddings/      ONNX nomic embedder
   ibnn/            Inhibition-Based Neural Network
+  mcp/             MCP streamable-http handler (JSON-RPC 2.0)
   nli/             DeBERTa NLI contradiction checker
   server/          HTTP + gRPC service layer
+  state/           Persistence backends (File, Redis, PostgreSQL, Hybrid)
   thoughts/        12-layer synthesis engine
-  turbogo/         4-bit quantized ANN index
-  turbovec/        Simple vector store + HTTP sidecar
+  turbogo/         4-bit quantized ANN index (production)
+  turbovec/        Simple vector store + HTTP sidecar (service API)
   gemma/           Ollama Gemma client
   metrics/         Prometheus instrumentation
   observability/   OpenTelemetry tracing
 installer/         Windows installer (NSSM + per-user)
 proto/             Protobuf definitions
+scripts/delivery/  Kiro CLI hooks (Go gRPC binaries)
 k8s/               Kubernetes manifests (Istio mesh)
 models/            ONNX model files (gitignored)
 data/              Persistent state (gitignored)

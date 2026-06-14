@@ -450,3 +450,62 @@ del data\states\dabrush.state
 del data\states\dabrush.ibnn.state
 nssm restart DeltaMemGo
 ```
+
+## Using MCP Tools (Agent Integration)
+
+δ-mem-go exposes 14 tools via MCP at `/mcp` on the HTTP port.
+
+### Agent Configuration
+
+Localhost (no auth):
+```json
+{
+  "dmem": { "url": "http://localhost:18080/mcp" }
+}
+```
+
+Mesh (with API key):
+```json
+{
+  "dmem": {
+    "url": "https://dmem.mesh.gs.doi.net/mcp",
+    "headers": { "X-API-Key": "your-service-key" }
+  }
+}
+```
+
+Local stdio (Python wrapper, for per-session process):
+```json
+{
+  "dmem": {
+    "command": "C:\\Users\\dabrush\\kiro-dmem\\venv\\Scripts\\python.exe",
+    "args": ["C:\\Users\\dabrush\\kiro-dmem\\server.py"],
+    "env": { "MCP_TRANSPORT": "stdio" }
+  }
+}
+```
+
+### Example Tool Usage
+
+```
+@dmem/dmem_store_deep key="k8s-mesh" content="compute mesh uses Flagger canary"
+@dmem/dmem_think seeds="LoRaWAN, data pipeline, Kubernetes"
+@dmem/dmem_validate statement="LoggerNet runs on Kubernetes pods"
+@dmem/dmem_search query="certificate management" deep=true
+@dmem/dmem_confident text="InSAR processing"
+@dmem/dmem_wander action="harvest"
+```
+
+### Kiro CLI Hooks (Automatic Background Memory)
+
+Hooks fire automatically on triggers — no agent action needed:
+
+| Tier | Store Hook (stop) | Enrich Hook (userPromptSubmit) |
+|------|-------------------|-------------------------------|
+| Light | `dmem-store-turn-light.exe` (Store) | `dmem-enrich-light.exe` (Recall+IBNN+TurboSearch) |
+| Standard | `dmem-store-turn-standard.exe` (Store+Learn) | `dmem-enrich-turn-standard.exe` (dual TurboSearch) |
+| Deep | `dmem-store-turn-deep.exe` (StoreDeep) | `dmem-enrich-turn-deep.exe` (all layers individually) |
+| Think | — | `dmem-enrich-deep.exe` (Think RPC, black box) |
+| Wander | `dmem-store-turn-wander.exe` (StartWander) | `dmem-enrich-turn-wander.exe` (HarvestWander) |
+
+Hooks are compiled Go binaries in `~/.kiro/hooks/`. See `scripts/delivery/go-grpc/README.md` for full details.

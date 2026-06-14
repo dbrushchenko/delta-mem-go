@@ -29,6 +29,13 @@ service DeltaMem {
   rpc Adapt(AdaptRequest) returns (AdaptResponse);
   rpc Learn(LearnRequest) returns (Empty);
   rpc Forget(ForgetRequest) returns (Empty);
+
+  // Full-pipeline RPCs — all layers wired
+  rpc StoreDeep(StoreRequest) returns (StoreDeepResponse);
+  rpc TurbogoSearch(TurboSearchRequest) returns (TurboSearchResponse);
+  rpc Validate(ValidateRequest) returns (ValidateResponse);
+  rpc QueryTemporal(TemporalRequest) returns (TemporalResponse);
+  rpc AmIConfident(ConfidenceRequest) returns (ConfidenceResponse);
 }
 
 // Original messages (unchanged)
@@ -173,4 +180,54 @@ message LearnRequest {
 message ForgetRequest {
   string owner = 1;
   string what = 2;
+}
+
+// StoreDeep response — includes all layer feedback
+message StoreDeepResponse {
+  bool ok = 1;
+  float state_norm = 2;        // δ-mem norm after store
+  float ibnn_reinforced = 3;   // IBNN learning rate applied
+  string turbogo_id = 4;       // ID in turbogo index
+  string turbovec_id = 5;      // ID in turbovec index
+}
+
+// Truth validation
+message ValidateRequest {
+  string owner = 1;
+  string statement = 2;
+}
+
+message ValidateResponse {
+  bool valid = 1;
+  float grounding = 2;
+  float coherence = 3;
+  string reason = 4;
+  repeated string contradictions = 5;
+}
+
+// Temporal query
+message TemporalRequest {
+  string owner = 1;
+  int32 limit = 2;
+}
+
+message TemporalResponse {
+  repeated TemporalEvent events = 1;
+}
+
+message TemporalEvent {
+  string id = 1;
+  string content = 2;
+  string when = 3;
+}
+
+// Self-model confidence
+message ConfidenceRequest {
+  string owner = 1;
+  string text = 2;
+}
+
+message ConfidenceResponse {
+  int32 level = 1;         // 0=NeverSeen, 1=Low, 2=Medium, 3=High
+  float raw_score = 2;
 }

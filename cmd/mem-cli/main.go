@@ -83,6 +83,53 @@ func main() {
 		if err != nil { fatal("forget: %v", err) }
 		fmt.Println("forgotten")
 
+	case "store-deep":
+		key, content := parseKV(args[1:])
+		resp, err := client.StoreDeep(ctx, &pb.StoreRequest{Owner: *owner, Key: key, Content: content})
+		if err != nil { fatal("store-deep: %v", err) }
+		fmt.Printf("stored-deep: norm=%.4f turbogo=%s turbovec=%s\n", resp.StateNorm, resp.TurbogoId, resp.TurbovecId)
+
+	case "search-deep":
+		query := strings.Join(args[1:], " ")
+		// Embed via IBNNForward then search turbogo
+		emb, err := client.IBNNForward(ctx, &pb.IBNNForwardRequest{Owner: *owner, Text: query})
+		if err != nil { fatal("embed: %v", err) }
+		resp, err := client.TurbogoSearch(ctx, &pb.TurboSearchRequest{Owner: *owner, Query: emb.Output, K: 5})
+		if err != nil { fatal("search-deep: %v", err) }
+		for i, id := range resp.Ids {
+			fmt.Printf("  [%d] %.4f  %s\n", i+1, resp.Scores[i], id)
+		}
+		if len(resp.Ids) == 0 { fmt.Println("  (no results)") }
+
+	case "validate":
+		statement := strings.Join(args[1:], " ")
+		resp, err := client.Validate(ctx, &pb.ValidateRequest{Owner: *owner, Statement: statement})
+		if err != nil { fatal("validate: %v", err) }
+		status := "✓ VALID"
+		if !resp.Valid { status = "✗ REJECTED" }
+		fmt.Printf("%s  grounding=%.3f coherence=%.3f\n", status, resp.Grounding, resp.Coherence)
+		if resp.Reason != "" { fmt.Printf("  reason: %s\n", resp.Reason) }
+		if len(resp.Contradictions) > 0 { fmt.Printf("  contradicts: %v\n", resp.Contradictions) }
+
+	case "temporal":
+		limit := 10
+		if len(args) > 1 { fmt.Sscanf(args[1], "%d", &limit) }
+		resp, err := client.QueryTemporal(ctx, &pb.TemporalRequest{Owner: *owner, Limit: int32(limit)})
+		if err != nil { fatal("temporal: %v", err) }
+		for _, e := range resp.Events {
+			fmt.Printf("  [%s] %s — %s\n", e.When, e.Id, e.Content)
+		}
+		if len(resp.Events) == 0 { fmt.Println("  (no events)") }
+
+	case "confident":
+		text := strings.Join(args[1:], " ")
+		resp, err := client.AmIConfident(ctx, &pb.ConfidenceRequest{Owner: *owner, Text: text})
+		if err != nil { fatal("confident: %v", err) }
+		levels := []string{"NeverSeen", "Uncertain", "Confident"}
+		level := "Unknown"
+		if int(resp.Level) < len(levels) { level = levels[resp.Level] }
+		fmt.Printf("%s (raw=%.2f)\n", level, resp.RawScore)
+
 	case "undo":
 		if len(args) < 3 { fatal("undo <original-wrong> <original-right>") }
 		// Undo calls Adapt in reverse
@@ -176,6 +223,7 @@ func usage() {
 
 Data Operations (gRPC):
   store --key <key> --content <text>   Store a fact
+  store-deep --key <key> --content <text>  Store through ALL layers
   recall <query>                        Recall related knowledge
   think <seed1> <seed2> ...            Synthesize a thought
   adapt <wrong> <right>                Correct a misconception
@@ -184,6 +232,10 @@ Data Operations (gRPC):
   undo <original-wrong> <original-right>  Reverse a correction
   axiom <statement>                    Add immutable truth constraint
   wander start|stop|harvest            Spontaneous thought control
+  search-deep <query>                  Search turbogo (production index)
+  validate <statement>                 Check against truth engine
+  temporal [limit]                     View recent temporal events
+  confident <text>                     Check self-model confidence
   health                               Check server status
 
 Setup Operations (HTTP):

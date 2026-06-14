@@ -178,3 +178,73 @@ func (s *Service) embed(text string) []float32 {
 	if norm > 0 { for i := range hidden { hidden[i] /= norm } }
 	return hidden
 }
+
+// StoreDeep chains ALL layers: embed → δ-mem → turbovec → turbogo → IBNN reinforce → temporal → self-model.
+func (s *Service) StoreDeep(ctx context.Context, owner, key, content string) (float32, error) {
+	hidden := s.embed(key + " " + content)
+
+	// δ-mem state accumulation
+	var norm float32
+	if s.om != nil {
+		var err error
+		norm, err = s.om.Store(owner, hidden)
+		if err != nil { return 0, err }
+	}
+
+	// turbovec (service layer index)
+	id := key
+	if len(id) > 60 { id = id[:60] }
+	if s.turboOM != nil {
+		s.turboOM.AddVector(owner, id, hidden)
+		s.turboOM.Save(owner)
+	}
+
+	// turbogo (thoughts engine production index) + IBNN reinforce + temporal via Learn
+	if s.thoughts != nil {
+		s.thoughts.Learn(ctx, owner, content)
+	}
+
+	// Self-model domain learning
+	s.thoughts.Self().LearnDomain(hidden, 0.03)
+
+	return norm, nil
+}
+
+// TurbogoSearch searches the production quantized vector store (turbogo) used by the thoughts engine.
+func (s *Service) TurbogoSearch(ctx context.Context, owner string, query []float32, k int) ([]string, []float32, error) {
+	if s.thoughts == nil {
+		return nil, nil, fmt.Errorf("thoughts engine not initialized")
+	}
+	// Access turbogo through the thoughts engine's vector store interface
+	return s.thoughts.SearchVector(owner, query, k)
+}
+
+// Validate runs a statement through the truth engine (axioms + NLI + coherence).
+func (s *Service) Validate(ctx context.Context, owner, statement string) (bool, float32, float32, string, []string) {
+	if s.thoughts == nil {
+		return true, 0, 0, "no truth engine", nil
+	}
+	v := s.thoughts.Truth().Validate(ctx, statement)
+	return v.Valid, v.Grounding, v.Coherence, v.Reason, v.Contradictions
+}
+
+// QueryTemporal returns recent temporal events for an owner.
+func (s *Service) QueryTemporal(owner string, limit int) []thoughts.Event {
+	if s.thoughts == nil { return nil }
+	return s.thoughts.Temporal().Recent(owner, limit)
+}
+
+// AmIConfident checks the self-model's confidence on a topic.
+func (s *Service) AmIConfident(ctx context.Context, owner, text string) (int, float32) {
+	if s.thoughts == nil { return 0, 0 }
+	hidden := s.embed(text)
+	conf := s.thoughts.Self().AmIConfident(hidden)
+	// Return raw score approximation based on level
+	var raw float32
+	switch conf {
+	case thoughts.Confident: raw = 1.0
+	case thoughts.Uncertain: raw = 0.5
+	default: raw = 0.0
+	}
+	return int(conf), raw
+}

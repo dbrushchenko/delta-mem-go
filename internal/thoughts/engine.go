@@ -68,6 +68,12 @@ func (e *Engine) Temporal() *Temporal { return e.temporal }
 // Self returns the self-model.
 func (e *Engine) Self() *SelfModel { return e.self }
 
+// SearchVector exposes the thoughts engine's vector store (turbogo) for external search.
+func (e *Engine) SearchVector(owner string, query []float32, k int) ([]string, []float32, error) {
+	if e.turbo == nil { return nil, nil, nil }
+	return e.turbo.SearchVector(owner, query, k)
+}
+
 // StartWander begins spontaneous thought for an owner.
 func (e *Engine) StartWander(owner string) {
 	if _, ok := e.wanderer[owner]; ok {

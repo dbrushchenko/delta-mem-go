@@ -21,6 +21,7 @@ import (
 	"github.com/dbrushchenko/delta-mem-go/internal/gemma"
 	"github.com/dbrushchenko/delta-mem-go/internal/ibnn"
 	"github.com/dbrushchenko/delta-mem-go/internal/logger"
+	mcpkg "github.com/dbrushchenko/delta-mem-go/internal/mcp"
 	"github.com/dbrushchenko/delta-mem-go/internal/metrics"
 	"github.com/dbrushchenko/delta-mem-go/internal/nli"
 	"github.com/dbrushchenko/delta-mem-go/internal/server"
@@ -98,6 +99,12 @@ func main() {
 	mux := http.NewServeMux()
 	metrics.RegisterMetricsHandler(mux)
 	svc.RegisterHTTP(mux)
+
+	// MCP endpoint — exposes all tools via streamable-http
+	mcpHandler := mcpkg.New()
+	mcpkg.RegisterTools(mcpHandler, svc)
+	mux.Handle("POST /mcp", mcpHandler)
+	l.Info("MCP registered", slog.Int("tools", 14))
 
 	handler := metrics.Middleware(auth.HTTPMiddleware(mux, cfg.APIKeys))
 	httpAddr := fmt.Sprintf(":%d", cfg.HTTPPort)

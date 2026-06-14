@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v5.29.3
-// source: proto/deltamem.proto
+// source: deltamem.proto
 
 package proto
 
@@ -38,6 +38,11 @@ const (
 	DeltaMem_Adapt_FullMethodName             = "/deltamem.DeltaMem/Adapt"
 	DeltaMem_Learn_FullMethodName             = "/deltamem.DeltaMem/Learn"
 	DeltaMem_Forget_FullMethodName            = "/deltamem.DeltaMem/Forget"
+	DeltaMem_StoreDeep_FullMethodName         = "/deltamem.DeltaMem/StoreDeep"
+	DeltaMem_TurbogoSearch_FullMethodName     = "/deltamem.DeltaMem/TurbogoSearch"
+	DeltaMem_Validate_FullMethodName          = "/deltamem.DeltaMem/Validate"
+	DeltaMem_QueryTemporal_FullMethodName     = "/deltamem.DeltaMem/QueryTemporal"
+	DeltaMem_AmIConfident_FullMethodName      = "/deltamem.DeltaMem/AmIConfident"
 )
 
 // DeltaMemClient is the client API for DeltaMem service.
@@ -66,6 +71,12 @@ type DeltaMemClient interface {
 	Adapt(ctx context.Context, in *AdaptRequest, opts ...grpc.CallOption) (*AdaptResponse, error)
 	Learn(ctx context.Context, in *LearnRequest, opts ...grpc.CallOption) (*Empty, error)
 	Forget(ctx context.Context, in *ForgetRequest, opts ...grpc.CallOption) (*Empty, error)
+	// Full-pipeline RPCs — all layers wired
+	StoreDeep(ctx context.Context, in *StoreRequest, opts ...grpc.CallOption) (*StoreDeepResponse, error)
+	TurbogoSearch(ctx context.Context, in *TurboSearchRequest, opts ...grpc.CallOption) (*TurboSearchResponse, error)
+	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
+	QueryTemporal(ctx context.Context, in *TemporalRequest, opts ...grpc.CallOption) (*TemporalResponse, error)
+	AmIConfident(ctx context.Context, in *ConfidenceRequest, opts ...grpc.CallOption) (*ConfidenceResponse, error)
 }
 
 type deltaMemClient struct {
@@ -266,6 +277,56 @@ func (c *deltaMemClient) Forget(ctx context.Context, in *ForgetRequest, opts ...
 	return out, nil
 }
 
+func (c *deltaMemClient) StoreDeep(ctx context.Context, in *StoreRequest, opts ...grpc.CallOption) (*StoreDeepResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StoreDeepResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_StoreDeep_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deltaMemClient) TurbogoSearch(ctx context.Context, in *TurboSearchRequest, opts ...grpc.CallOption) (*TurboSearchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TurboSearchResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_TurbogoSearch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deltaMemClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_Validate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deltaMemClient) QueryTemporal(ctx context.Context, in *TemporalRequest, opts ...grpc.CallOption) (*TemporalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TemporalResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_QueryTemporal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deltaMemClient) AmIConfident(ctx context.Context, in *ConfidenceRequest, opts ...grpc.CallOption) (*ConfidenceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfidenceResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_AmIConfident_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DeltaMemServer is the server API for DeltaMem service.
 // All implementations must embed UnimplementedDeltaMemServer
 // for forward compatibility.
@@ -292,6 +353,12 @@ type DeltaMemServer interface {
 	Adapt(context.Context, *AdaptRequest) (*AdaptResponse, error)
 	Learn(context.Context, *LearnRequest) (*Empty, error)
 	Forget(context.Context, *ForgetRequest) (*Empty, error)
+	// Full-pipeline RPCs — all layers wired
+	StoreDeep(context.Context, *StoreRequest) (*StoreDeepResponse, error)
+	TurbogoSearch(context.Context, *TurboSearchRequest) (*TurboSearchResponse, error)
+	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
+	QueryTemporal(context.Context, *TemporalRequest) (*TemporalResponse, error)
+	AmIConfident(context.Context, *ConfidenceRequest) (*ConfidenceResponse, error)
 	mustEmbedUnimplementedDeltaMemServer()
 }
 
@@ -358,6 +425,21 @@ func (UnimplementedDeltaMemServer) Learn(context.Context, *LearnRequest) (*Empty
 }
 func (UnimplementedDeltaMemServer) Forget(context.Context, *ForgetRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method Forget not implemented")
+}
+func (UnimplementedDeltaMemServer) StoreDeep(context.Context, *StoreRequest) (*StoreDeepResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method StoreDeep not implemented")
+}
+func (UnimplementedDeltaMemServer) TurbogoSearch(context.Context, *TurboSearchRequest) (*TurboSearchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TurbogoSearch not implemented")
+}
+func (UnimplementedDeltaMemServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Validate not implemented")
+}
+func (UnimplementedDeltaMemServer) QueryTemporal(context.Context, *TemporalRequest) (*TemporalResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method QueryTemporal not implemented")
+}
+func (UnimplementedDeltaMemServer) AmIConfident(context.Context, *ConfidenceRequest) (*ConfidenceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AmIConfident not implemented")
 }
 func (UnimplementedDeltaMemServer) mustEmbedUnimplementedDeltaMemServer() {}
 func (UnimplementedDeltaMemServer) testEmbeddedByValue()                  {}
@@ -722,6 +804,96 @@ func _DeltaMem_Forget_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeltaMem_StoreDeep_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).StoreDeep(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_StoreDeep_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).StoreDeep(ctx, req.(*StoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeltaMem_TurbogoSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TurboSearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).TurbogoSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_TurbogoSearch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).TurbogoSearch(ctx, req.(*TurboSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeltaMem_Validate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).Validate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_Validate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).Validate(ctx, req.(*ValidateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeltaMem_QueryTemporal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TemporalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).QueryTemporal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_QueryTemporal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).QueryTemporal(ctx, req.(*TemporalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeltaMem_AmIConfident_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfidenceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).AmIConfident(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_AmIConfident_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).AmIConfident(ctx, req.(*ConfidenceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DeltaMem_ServiceDesc is the grpc.ServiceDesc for DeltaMem service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -805,7 +977,27 @@ var DeltaMem_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Forget",
 			Handler:    _DeltaMem_Forget_Handler,
 		},
+		{
+			MethodName: "StoreDeep",
+			Handler:    _DeltaMem_StoreDeep_Handler,
+		},
+		{
+			MethodName: "TurbogoSearch",
+			Handler:    _DeltaMem_TurbogoSearch_Handler,
+		},
+		{
+			MethodName: "Validate",
+			Handler:    _DeltaMem_Validate_Handler,
+		},
+		{
+			MethodName: "QueryTemporal",
+			Handler:    _DeltaMem_QueryTemporal_Handler,
+		},
+		{
+			MethodName: "AmIConfident",
+			Handler:    _DeltaMem_AmIConfident_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/deltamem.proto",
+	Metadata: "deltamem.proto",
 }

@@ -248,3 +248,45 @@ Annotations:
   - sidecar.istio.io/inject: "true"
   - prometheus.io/scrape: "true"
 ```
+
+## Protocol Interfaces
+
+Single binary serves three protocol paths to the same service layer:
+
+```
+delta-mem-go.exe
+  ├── :18080       HTTP REST API (/store, /recall, /health, /metrics, /enroll)
+  ├── :18080/mcp   MCP (JSON-RPC 2.0, 14 tools, streamable-http)
+  └── :19090       gRPC (protobuf, 24 RPCs)
+```
+
+All three share the same in-process `*server.Service` — same δ-mem state, IBNN weights,
+turbovec/turbogo indexes. A Store via gRPC and dmem_store via MCP modify the same matrices.
+
+### Protocol Selection Guide
+
+| Use case | Protocol | Why |
+|----------|----------|-----|
+| Kiro CLI hooks (Go binaries) | gRPC :19090 | Fastest (~5ms), compiled client |
+| Agent on-demand tools (MCP) | HTTP :18080/mcp | Standard agent tool protocol |
+| Manual testing / scripts | HTTP REST :18080 | curl-friendly |
+| Mesh-to-mesh (pod-to-pod) | gRPC :19090 | Protobuf efficiency |
+| Remote agent (no local install) | MCP URL | `"url": "https://dmem.mesh.gs.doi.net/mcp"` |
+
+### Authentication
+
+Both HTTP and gRPC use service-level API key (not per-owner):
+- HTTP: `X-API-Key` header
+- gRPC: `x-api-key` metadata
+- MCP: Same `X-API-Key` (goes through HTTP middleware)
+- No keys configured → passthrough (localhost dev mode)
+
+### New RPCs (2026-06-14)
+
+| RPC | Layers | Purpose |
+|-----|--------|---------|
+| `StoreDeep` | All (Store + Learn) | Single-call full-pipeline storage |
+| `TurbogoSearch` | turbogo (4) | Direct production index query |
+| `Validate` | Truth (10) + NLI (7) | Statement truth-checking |
+| `QueryTemporal` | Temporal (8) | Recent event history |
+| `AmIConfident` | Self-model (9) | Topic confidence check |

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v5.29.3
-// source: proto/deltamem.proto
+// source: deltamem.proto
 
 package proto
 
@@ -33,7 +33,7 @@ type StoreRequest struct {
 
 func (x *StoreRequest) Reset() {
 	*x = StoreRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[0]
+	mi := &file_deltamem_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *StoreRequest) String() string {
 func (*StoreRequest) ProtoMessage() {}
 
 func (x *StoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[0]
+	mi := &file_deltamem_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *StoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreRequest.ProtoReflect.Descriptor instead.
 func (*StoreRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{0}
+	return file_deltamem_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *StoreRequest) GetOwner() string {
@@ -92,7 +92,7 @@ type StoreResponse struct {
 
 func (x *StoreResponse) Reset() {
 	*x = StoreResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[1]
+	mi := &file_deltamem_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -104,7 +104,7 @@ func (x *StoreResponse) String() string {
 func (*StoreResponse) ProtoMessage() {}
 
 func (x *StoreResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[1]
+	mi := &file_deltamem_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -117,7 +117,7 @@ func (x *StoreResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreResponse.ProtoReflect.Descriptor instead.
 func (*StoreResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{1}
+	return file_deltamem_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *StoreResponse) GetOk() bool {
@@ -144,7 +144,7 @@ type RecallRequest struct {
 
 func (x *RecallRequest) Reset() {
 	*x = RecallRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[2]
+	mi := &file_deltamem_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -156,7 +156,7 @@ func (x *RecallRequest) String() string {
 func (*RecallRequest) ProtoMessage() {}
 
 func (x *RecallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[2]
+	mi := &file_deltamem_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -169,7 +169,7 @@ func (x *RecallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecallRequest.ProtoReflect.Descriptor instead.
 func (*RecallRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{2}
+	return file_deltamem_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RecallRequest) GetOwner() string {
@@ -196,7 +196,7 @@ type RecallResponse struct {
 
 func (x *RecallResponse) Reset() {
 	*x = RecallResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[3]
+	mi := &file_deltamem_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -208,7 +208,7 @@ func (x *RecallResponse) String() string {
 func (*RecallResponse) ProtoMessage() {}
 
 func (x *RecallResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[3]
+	mi := &file_deltamem_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -221,7 +221,7 @@ func (x *RecallResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecallResponse.ProtoReflect.Descriptor instead.
 func (*RecallResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{3}
+	return file_deltamem_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RecallResponse) GetCorrection() []float32 {
@@ -248,7 +248,7 @@ type HiddenStoreRequest struct {
 
 func (x *HiddenStoreRequest) Reset() {
 	*x = HiddenStoreRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[4]
+	mi := &file_deltamem_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -260,7 +260,7 @@ func (x *HiddenStoreRequest) String() string {
 func (*HiddenStoreRequest) ProtoMessage() {}
 
 func (x *HiddenStoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[4]
+	mi := &file_deltamem_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -273,7 +273,7 @@ func (x *HiddenStoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HiddenStoreRequest.ProtoReflect.Descriptor instead.
 func (*HiddenStoreRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{4}
+	return file_deltamem_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HiddenStoreRequest) GetOwner() string {
@@ -300,7 +300,7 @@ type HiddenRecallRequest struct {
 
 func (x *HiddenRecallRequest) Reset() {
 	*x = HiddenRecallRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[5]
+	mi := &file_deltamem_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -312,7 +312,7 @@ func (x *HiddenRecallRequest) String() string {
 func (*HiddenRecallRequest) ProtoMessage() {}
 
 func (x *HiddenRecallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[5]
+	mi := &file_deltamem_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -325,7 +325,7 @@ func (x *HiddenRecallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HiddenRecallRequest.ProtoReflect.Descriptor instead.
 func (*HiddenRecallRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{5}
+	return file_deltamem_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *HiddenRecallRequest) GetOwner() string {
@@ -353,7 +353,7 @@ type HiddenRecallResponse struct {
 
 func (x *HiddenRecallResponse) Reset() {
 	*x = HiddenRecallResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[6]
+	mi := &file_deltamem_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -365,7 +365,7 @@ func (x *HiddenRecallResponse) String() string {
 func (*HiddenRecallResponse) ProtoMessage() {}
 
 func (x *HiddenRecallResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[6]
+	mi := &file_deltamem_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -378,7 +378,7 @@ func (x *HiddenRecallResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HiddenRecallResponse.ProtoReflect.Descriptor instead.
 func (*HiddenRecallResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{6}
+	return file_deltamem_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *HiddenRecallResponse) GetDeltaQ() []float32 {
@@ -415,7 +415,7 @@ type HealthResponse struct {
 
 func (x *HealthResponse) Reset() {
 	*x = HealthResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[7]
+	mi := &file_deltamem_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -427,7 +427,7 @@ func (x *HealthResponse) String() string {
 func (*HealthResponse) ProtoMessage() {}
 
 func (x *HealthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[7]
+	mi := &file_deltamem_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -440,7 +440,7 @@ func (x *HealthResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthResponse.ProtoReflect.Descriptor instead.
 func (*HealthResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{7}
+	return file_deltamem_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *HealthResponse) GetOwnersActive() int32 {
@@ -487,7 +487,7 @@ type OwnerRequest struct {
 
 func (x *OwnerRequest) Reset() {
 	*x = OwnerRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[8]
+	mi := &file_deltamem_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -499,7 +499,7 @@ func (x *OwnerRequest) String() string {
 func (*OwnerRequest) ProtoMessage() {}
 
 func (x *OwnerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[8]
+	mi := &file_deltamem_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +512,7 @@ func (x *OwnerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OwnerRequest.ProtoReflect.Descriptor instead.
 func (*OwnerRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{8}
+	return file_deltamem_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *OwnerRequest) GetOwner() string {
@@ -530,7 +530,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_deltamem_proto_msgTypes[9]
+	mi := &file_deltamem_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -542,7 +542,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[9]
+	mi := &file_deltamem_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -555,7 +555,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{9}
+	return file_deltamem_proto_rawDescGZIP(), []int{9}
 }
 
 // New messages for IBNN, turbovec, Gemma 4 QAT
@@ -569,7 +569,7 @@ type IBNNForwardRequest struct {
 
 func (x *IBNNForwardRequest) Reset() {
 	*x = IBNNForwardRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[10]
+	mi := &file_deltamem_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -581,7 +581,7 @@ func (x *IBNNForwardRequest) String() string {
 func (*IBNNForwardRequest) ProtoMessage() {}
 
 func (x *IBNNForwardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[10]
+	mi := &file_deltamem_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,7 +594,7 @@ func (x *IBNNForwardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IBNNForwardRequest.ProtoReflect.Descriptor instead.
 func (*IBNNForwardRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{10}
+	return file_deltamem_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *IBNNForwardRequest) GetOwner() string {
@@ -621,7 +621,7 @@ type IBNNForwardHiddenRequest struct {
 
 func (x *IBNNForwardHiddenRequest) Reset() {
 	*x = IBNNForwardHiddenRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[11]
+	mi := &file_deltamem_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +633,7 @@ func (x *IBNNForwardHiddenRequest) String() string {
 func (*IBNNForwardHiddenRequest) ProtoMessage() {}
 
 func (x *IBNNForwardHiddenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[11]
+	mi := &file_deltamem_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +646,7 @@ func (x *IBNNForwardHiddenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IBNNForwardHiddenRequest.ProtoReflect.Descriptor instead.
 func (*IBNNForwardHiddenRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{11}
+	return file_deltamem_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *IBNNForwardHiddenRequest) GetOwner() string {
@@ -673,7 +673,7 @@ type IBNNForwardResponse struct {
 
 func (x *IBNNForwardResponse) Reset() {
 	*x = IBNNForwardResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[12]
+	mi := &file_deltamem_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -685,7 +685,7 @@ func (x *IBNNForwardResponse) String() string {
 func (*IBNNForwardResponse) ProtoMessage() {}
 
 func (x *IBNNForwardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[12]
+	mi := &file_deltamem_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -698,7 +698,7 @@ func (x *IBNNForwardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IBNNForwardResponse.ProtoReflect.Descriptor instead.
 func (*IBNNForwardResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{12}
+	return file_deltamem_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *IBNNForwardResponse) GetOutput() []float32 {
@@ -726,7 +726,7 @@ type TurboAddRequest struct {
 
 func (x *TurboAddRequest) Reset() {
 	*x = TurboAddRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[13]
+	mi := &file_deltamem_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +738,7 @@ func (x *TurboAddRequest) String() string {
 func (*TurboAddRequest) ProtoMessage() {}
 
 func (x *TurboAddRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[13]
+	mi := &file_deltamem_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +751,7 @@ func (x *TurboAddRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurboAddRequest.ProtoReflect.Descriptor instead.
 func (*TurboAddRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{13}
+	return file_deltamem_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *TurboAddRequest) GetOwner() string {
@@ -784,7 +784,7 @@ type TurboAddResponse struct {
 
 func (x *TurboAddResponse) Reset() {
 	*x = TurboAddResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[14]
+	mi := &file_deltamem_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -796,7 +796,7 @@ func (x *TurboAddResponse) String() string {
 func (*TurboAddResponse) ProtoMessage() {}
 
 func (x *TurboAddResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[14]
+	mi := &file_deltamem_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -809,7 +809,7 @@ func (x *TurboAddResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurboAddResponse.ProtoReflect.Descriptor instead.
 func (*TurboAddResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{14}
+	return file_deltamem_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *TurboAddResponse) GetOk() bool {
@@ -830,7 +830,7 @@ type TurboSearchRequest struct {
 
 func (x *TurboSearchRequest) Reset() {
 	*x = TurboSearchRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[15]
+	mi := &file_deltamem_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -842,7 +842,7 @@ func (x *TurboSearchRequest) String() string {
 func (*TurboSearchRequest) ProtoMessage() {}
 
 func (x *TurboSearchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[15]
+	mi := &file_deltamem_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -855,7 +855,7 @@ func (x *TurboSearchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurboSearchRequest.ProtoReflect.Descriptor instead.
 func (*TurboSearchRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{15}
+	return file_deltamem_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *TurboSearchRequest) GetOwner() string {
@@ -889,7 +889,7 @@ type TurboSearchResponse struct {
 
 func (x *TurboSearchResponse) Reset() {
 	*x = TurboSearchResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[16]
+	mi := &file_deltamem_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -901,7 +901,7 @@ func (x *TurboSearchResponse) String() string {
 func (*TurboSearchResponse) ProtoMessage() {}
 
 func (x *TurboSearchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[16]
+	mi := &file_deltamem_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -914,7 +914,7 @@ func (x *TurboSearchResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurboSearchResponse.ProtoReflect.Descriptor instead.
 func (*TurboSearchResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{16}
+	return file_deltamem_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *TurboSearchResponse) GetIds() []string {
@@ -941,7 +941,7 @@ type GenerateRequest struct {
 
 func (x *GenerateRequest) Reset() {
 	*x = GenerateRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[17]
+	mi := &file_deltamem_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -953,7 +953,7 @@ func (x *GenerateRequest) String() string {
 func (*GenerateRequest) ProtoMessage() {}
 
 func (x *GenerateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[17]
+	mi := &file_deltamem_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -966,7 +966,7 @@ func (x *GenerateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateRequest.ProtoReflect.Descriptor instead.
 func (*GenerateRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{17}
+	return file_deltamem_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GenerateRequest) GetOwner() string {
@@ -992,7 +992,7 @@ type GenerateResponse struct {
 
 func (x *GenerateResponse) Reset() {
 	*x = GenerateResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[18]
+	mi := &file_deltamem_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1004,7 +1004,7 @@ func (x *GenerateResponse) String() string {
 func (*GenerateResponse) ProtoMessage() {}
 
 func (x *GenerateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[18]
+	mi := &file_deltamem_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1017,7 +1017,7 @@ func (x *GenerateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateResponse.ProtoReflect.Descriptor instead.
 func (*GenerateResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{18}
+	return file_deltamem_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GenerateResponse) GetResponse() string {
@@ -1037,7 +1037,7 @@ type ThinkRequest struct {
 
 func (x *ThinkRequest) Reset() {
 	*x = ThinkRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[19]
+	mi := &file_deltamem_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1049,7 +1049,7 @@ func (x *ThinkRequest) String() string {
 func (*ThinkRequest) ProtoMessage() {}
 
 func (x *ThinkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[19]
+	mi := &file_deltamem_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1062,7 +1062,7 @@ func (x *ThinkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThinkRequest.ProtoReflect.Descriptor instead.
 func (*ThinkRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{19}
+	return file_deltamem_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ThinkRequest) GetOwner() string {
@@ -1095,7 +1095,7 @@ type ThinkResponse struct {
 
 func (x *ThinkResponse) Reset() {
 	*x = ThinkResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[20]
+	mi := &file_deltamem_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1107,7 +1107,7 @@ func (x *ThinkResponse) String() string {
 func (*ThinkResponse) ProtoMessage() {}
 
 func (x *ThinkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[20]
+	mi := &file_deltamem_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1120,7 +1120,7 @@ func (x *ThinkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThinkResponse.ProtoReflect.Descriptor instead.
 func (*ThinkResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{20}
+	return file_deltamem_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ThinkResponse) GetIdea() string {
@@ -1188,7 +1188,7 @@ type HarvestResponse struct {
 
 func (x *HarvestResponse) Reset() {
 	*x = HarvestResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[21]
+	mi := &file_deltamem_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1200,7 +1200,7 @@ func (x *HarvestResponse) String() string {
 func (*HarvestResponse) ProtoMessage() {}
 
 func (x *HarvestResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[21]
+	mi := &file_deltamem_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1213,7 +1213,7 @@ func (x *HarvestResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HarvestResponse.ProtoReflect.Descriptor instead.
 func (*HarvestResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{21}
+	return file_deltamem_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *HarvestResponse) GetThoughts() []*ThinkResponse {
@@ -1233,7 +1233,7 @@ type AxiomRequest struct {
 
 func (x *AxiomRequest) Reset() {
 	*x = AxiomRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[22]
+	mi := &file_deltamem_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1245,7 +1245,7 @@ func (x *AxiomRequest) String() string {
 func (*AxiomRequest) ProtoMessage() {}
 
 func (x *AxiomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[22]
+	mi := &file_deltamem_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1258,7 +1258,7 @@ func (x *AxiomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AxiomRequest.ProtoReflect.Descriptor instead.
 func (*AxiomRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{22}
+	return file_deltamem_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AxiomRequest) GetStatement() string {
@@ -1286,7 +1286,7 @@ type AdaptRequest struct {
 
 func (x *AdaptRequest) Reset() {
 	*x = AdaptRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[23]
+	mi := &file_deltamem_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1298,7 +1298,7 @@ func (x *AdaptRequest) String() string {
 func (*AdaptRequest) ProtoMessage() {}
 
 func (x *AdaptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[23]
+	mi := &file_deltamem_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1311,7 +1311,7 @@ func (x *AdaptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdaptRequest.ProtoReflect.Descriptor instead.
 func (*AdaptRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{23}
+	return file_deltamem_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AdaptRequest) GetOwner() string {
@@ -1344,7 +1344,7 @@ type AdaptResponse struct {
 
 func (x *AdaptResponse) Reset() {
 	*x = AdaptResponse{}
-	mi := &file_proto_deltamem_proto_msgTypes[24]
+	mi := &file_deltamem_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1356,7 +1356,7 @@ func (x *AdaptResponse) String() string {
 func (*AdaptResponse) ProtoMessage() {}
 
 func (x *AdaptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[24]
+	mi := &file_deltamem_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1369,7 +1369,7 @@ func (x *AdaptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdaptResponse.ProtoReflect.Descriptor instead.
 func (*AdaptResponse) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{24}
+	return file_deltamem_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *AdaptResponse) GetImpact() float32 {
@@ -1389,7 +1389,7 @@ type LearnRequest struct {
 
 func (x *LearnRequest) Reset() {
 	*x = LearnRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[25]
+	mi := &file_deltamem_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1401,7 +1401,7 @@ func (x *LearnRequest) String() string {
 func (*LearnRequest) ProtoMessage() {}
 
 func (x *LearnRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[25]
+	mi := &file_deltamem_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1414,7 +1414,7 @@ func (x *LearnRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LearnRequest.ProtoReflect.Descriptor instead.
 func (*LearnRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{25}
+	return file_deltamem_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *LearnRequest) GetOwner() string {
@@ -1441,7 +1441,7 @@ type ForgetRequest struct {
 
 func (x *ForgetRequest) Reset() {
 	*x = ForgetRequest{}
-	mi := &file_proto_deltamem_proto_msgTypes[26]
+	mi := &file_deltamem_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1453,7 +1453,7 @@ func (x *ForgetRequest) String() string {
 func (*ForgetRequest) ProtoMessage() {}
 
 func (x *ForgetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_deltamem_proto_msgTypes[26]
+	mi := &file_deltamem_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1466,7 +1466,7 @@ func (x *ForgetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForgetRequest.ProtoReflect.Descriptor instead.
 func (*ForgetRequest) Descriptor() ([]byte, []int) {
-	return file_proto_deltamem_proto_rawDescGZIP(), []int{26}
+	return file_deltamem_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ForgetRequest) GetOwner() string {
@@ -1483,11 +1483,479 @@ func (x *ForgetRequest) GetWhat() string {
 	return ""
 }
 
-var File_proto_deltamem_proto protoreflect.FileDescriptor
+// StoreDeep response — includes all layer feedback
+type StoreDeepResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Ok             bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	StateNorm      float32                `protobuf:"fixed32,2,opt,name=state_norm,json=stateNorm,proto3" json:"state_norm,omitempty"`                // δ-mem norm after store
+	IbnnReinforced float32                `protobuf:"fixed32,3,opt,name=ibnn_reinforced,json=ibnnReinforced,proto3" json:"ibnn_reinforced,omitempty"` // IBNN learning rate applied
+	TurbogoId      string                 `protobuf:"bytes,4,opt,name=turbogo_id,json=turbogoId,proto3" json:"turbogo_id,omitempty"`                  // ID in turbogo index
+	TurbovecId     string                 `protobuf:"bytes,5,opt,name=turbovec_id,json=turbovecId,proto3" json:"turbovec_id,omitempty"`               // ID in turbovec index
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
 
-const file_proto_deltamem_proto_rawDesc = "" +
+func (x *StoreDeepResponse) Reset() {
+	*x = StoreDeepResponse{}
+	mi := &file_deltamem_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StoreDeepResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StoreDeepResponse) ProtoMessage() {}
+
+func (x *StoreDeepResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StoreDeepResponse.ProtoReflect.Descriptor instead.
+func (*StoreDeepResponse) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *StoreDeepResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *StoreDeepResponse) GetStateNorm() float32 {
+	if x != nil {
+		return x.StateNorm
+	}
+	return 0
+}
+
+func (x *StoreDeepResponse) GetIbnnReinforced() float32 {
+	if x != nil {
+		return x.IbnnReinforced
+	}
+	return 0
+}
+
+func (x *StoreDeepResponse) GetTurbogoId() string {
+	if x != nil {
+		return x.TurbogoId
+	}
+	return ""
+}
+
+func (x *StoreDeepResponse) GetTurbovecId() string {
+	if x != nil {
+		return x.TurbovecId
+	}
+	return ""
+}
+
+// Truth validation
+type ValidateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Owner         string                 `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	Statement     string                 `protobuf:"bytes,2,opt,name=statement,proto3" json:"statement,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateRequest) Reset() {
+	*x = ValidateRequest{}
+	mi := &file_deltamem_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateRequest) ProtoMessage() {}
+
+func (x *ValidateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateRequest.ProtoReflect.Descriptor instead.
+func (*ValidateRequest) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ValidateRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *ValidateRequest) GetStatement() string {
+	if x != nil {
+		return x.Statement
+	}
+	return ""
+}
+
+type ValidateResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Valid          bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	Grounding      float32                `protobuf:"fixed32,2,opt,name=grounding,proto3" json:"grounding,omitempty"`
+	Coherence      float32                `protobuf:"fixed32,3,opt,name=coherence,proto3" json:"coherence,omitempty"`
+	Reason         string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	Contradictions []string               `protobuf:"bytes,5,rep,name=contradictions,proto3" json:"contradictions,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ValidateResponse) Reset() {
+	*x = ValidateResponse{}
+	mi := &file_deltamem_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateResponse) ProtoMessage() {}
+
+func (x *ValidateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateResponse.ProtoReflect.Descriptor instead.
+func (*ValidateResponse) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ValidateResponse) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
+func (x *ValidateResponse) GetGrounding() float32 {
+	if x != nil {
+		return x.Grounding
+	}
+	return 0
+}
+
+func (x *ValidateResponse) GetCoherence() float32 {
+	if x != nil {
+		return x.Coherence
+	}
+	return 0
+}
+
+func (x *ValidateResponse) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *ValidateResponse) GetContradictions() []string {
+	if x != nil {
+		return x.Contradictions
+	}
+	return nil
+}
+
+// Temporal query
+type TemporalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Owner         string                 `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TemporalRequest) Reset() {
+	*x = TemporalRequest{}
+	mi := &file_deltamem_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TemporalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TemporalRequest) ProtoMessage() {}
+
+func (x *TemporalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TemporalRequest.ProtoReflect.Descriptor instead.
+func (*TemporalRequest) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *TemporalRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *TemporalRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type TemporalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*TemporalEvent       `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TemporalResponse) Reset() {
+	*x = TemporalResponse{}
+	mi := &file_deltamem_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TemporalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TemporalResponse) ProtoMessage() {}
+
+func (x *TemporalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TemporalResponse.ProtoReflect.Descriptor instead.
+func (*TemporalResponse) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *TemporalResponse) GetEvents() []*TemporalEvent {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+type TemporalEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	When          string                 `protobuf:"bytes,3,opt,name=when,proto3" json:"when,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TemporalEvent) Reset() {
+	*x = TemporalEvent{}
+	mi := &file_deltamem_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TemporalEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TemporalEvent) ProtoMessage() {}
+
+func (x *TemporalEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TemporalEvent.ProtoReflect.Descriptor instead.
+func (*TemporalEvent) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *TemporalEvent) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *TemporalEvent) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *TemporalEvent) GetWhen() string {
+	if x != nil {
+		return x.When
+	}
+	return ""
+}
+
+// Self-model confidence
+type ConfidenceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Owner         string                 `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConfidenceRequest) Reset() {
+	*x = ConfidenceRequest{}
+	mi := &file_deltamem_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfidenceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfidenceRequest) ProtoMessage() {}
+
+func (x *ConfidenceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfidenceRequest.ProtoReflect.Descriptor instead.
+func (*ConfidenceRequest) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *ConfidenceRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *ConfidenceRequest) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type ConfidenceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Level         int32                  `protobuf:"varint,1,opt,name=level,proto3" json:"level,omitempty"` // 0=NeverSeen, 1=Low, 2=Medium, 3=High
+	RawScore      float32                `protobuf:"fixed32,2,opt,name=raw_score,json=rawScore,proto3" json:"raw_score,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConfidenceResponse) Reset() {
+	*x = ConfidenceResponse{}
+	mi := &file_deltamem_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfidenceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfidenceResponse) ProtoMessage() {}
+
+func (x *ConfidenceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfidenceResponse.ProtoReflect.Descriptor instead.
+func (*ConfidenceResponse) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *ConfidenceResponse) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *ConfidenceResponse) GetRawScore() float32 {
+	if x != nil {
+		return x.RawScore
+	}
+	return 0
+}
+
+var File_deltamem_proto protoreflect.FileDescriptor
+
+const file_deltamem_proto_rawDesc = "" +
 	"\n" +
-	"\x14proto/deltamem.proto\x12\bdeltamem\"P\n" +
+	"\x0edeltamem.proto\x12\bdeltamem\"P\n" +
 	"\fStoreRequest\x12\x14\n" +
 	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x18\n" +
@@ -1585,7 +2053,40 @@ const file_proto_deltamem_proto_rawDesc = "" +
 	"\x04fact\x18\x02 \x01(\tR\x04fact\"9\n" +
 	"\rForgetRequest\x12\x14\n" +
 	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x12\n" +
-	"\x04what\x18\x02 \x01(\tR\x04what2\xba\t\n" +
+	"\x04what\x18\x02 \x01(\tR\x04what\"\xab\x01\n" +
+	"\x11StoreDeepResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x1d\n" +
+	"\n" +
+	"state_norm\x18\x02 \x01(\x02R\tstateNorm\x12'\n" +
+	"\x0fibnn_reinforced\x18\x03 \x01(\x02R\x0eibnnReinforced\x12\x1d\n" +
+	"\n" +
+	"turbogo_id\x18\x04 \x01(\tR\tturbogoId\x12\x1f\n" +
+	"\vturbovec_id\x18\x05 \x01(\tR\n" +
+	"turbovecId\"E\n" +
+	"\x0fValidateRequest\x12\x14\n" +
+	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x1c\n" +
+	"\tstatement\x18\x02 \x01(\tR\tstatement\"\xa4\x01\n" +
+	"\x10ValidateResponse\x12\x14\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x1c\n" +
+	"\tgrounding\x18\x02 \x01(\x02R\tgrounding\x12\x1c\n" +
+	"\tcoherence\x18\x03 \x01(\x02R\tcoherence\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12&\n" +
+	"\x0econtradictions\x18\x05 \x03(\tR\x0econtradictions\"=\n" +
+	"\x0fTemporalRequest\x12\x14\n" +
+	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"C\n" +
+	"\x10TemporalResponse\x12/\n" +
+	"\x06events\x18\x01 \x03(\v2\x17.deltamem.TemporalEventR\x06events\"M\n" +
+	"\rTemporalEvent\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12\x12\n" +
+	"\x04when\x18\x03 \x01(\tR\x04when\"=\n" +
+	"\x11ConfidenceRequest\x12\x14\n" +
+	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x12\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\"G\n" +
+	"\x12ConfidenceResponse\x12\x14\n" +
+	"\x05level\x18\x01 \x01(\x05R\x05level\x12\x1b\n" +
+	"\traw_score\x18\x02 \x01(\x02R\brawScore2\xa0\f\n" +
 	"\bDeltaMem\x128\n" +
 	"\x05Store\x12\x16.deltamem.StoreRequest\x1a\x17.deltamem.StoreResponse\x12;\n" +
 	"\x06Recall\x12\x17.deltamem.RecallRequest\x1a\x18.deltamem.RecallResponse\x12D\n" +
@@ -1607,22 +2108,27 @@ const file_proto_deltamem_proto_rawDesc = "" +
 	"\bAddAxiom\x12\x16.deltamem.AxiomRequest\x1a\x0f.deltamem.Empty\x128\n" +
 	"\x05Adapt\x12\x16.deltamem.AdaptRequest\x1a\x17.deltamem.AdaptResponse\x120\n" +
 	"\x05Learn\x12\x16.deltamem.LearnRequest\x1a\x0f.deltamem.Empty\x122\n" +
-	"\x06Forget\x12\x17.deltamem.ForgetRequest\x1a\x0f.deltamem.EmptyB,Z*github.com/dbrushchenko/delta-mem-go/protob\x06proto3"
+	"\x06Forget\x12\x17.deltamem.ForgetRequest\x1a\x0f.deltamem.Empty\x12@\n" +
+	"\tStoreDeep\x12\x16.deltamem.StoreRequest\x1a\x1b.deltamem.StoreDeepResponse\x12L\n" +
+	"\rTurbogoSearch\x12\x1c.deltamem.TurboSearchRequest\x1a\x1d.deltamem.TurboSearchResponse\x12A\n" +
+	"\bValidate\x12\x19.deltamem.ValidateRequest\x1a\x1a.deltamem.ValidateResponse\x12F\n" +
+	"\rQueryTemporal\x12\x19.deltamem.TemporalRequest\x1a\x1a.deltamem.TemporalResponse\x12I\n" +
+	"\fAmIConfident\x12\x1b.deltamem.ConfidenceRequest\x1a\x1c.deltamem.ConfidenceResponseB,Z*github.com/dbrushchenko/delta-mem-go/protob\x06proto3"
 
 var (
-	file_proto_deltamem_proto_rawDescOnce sync.Once
-	file_proto_deltamem_proto_rawDescData []byte
+	file_deltamem_proto_rawDescOnce sync.Once
+	file_deltamem_proto_rawDescData []byte
 )
 
-func file_proto_deltamem_proto_rawDescGZIP() []byte {
-	file_proto_deltamem_proto_rawDescOnce.Do(func() {
-		file_proto_deltamem_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_deltamem_proto_rawDesc), len(file_proto_deltamem_proto_rawDesc)))
+func file_deltamem_proto_rawDescGZIP() []byte {
+	file_deltamem_proto_rawDescOnce.Do(func() {
+		file_deltamem_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_deltamem_proto_rawDesc), len(file_deltamem_proto_rawDesc)))
 	})
-	return file_proto_deltamem_proto_rawDescData
+	return file_deltamem_proto_rawDescData
 }
 
-var file_proto_deltamem_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
-var file_proto_deltamem_proto_goTypes = []any{
+var file_deltamem_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_deltamem_proto_goTypes = []any{
 	(*StoreRequest)(nil),             // 0: deltamem.StoreRequest
 	(*StoreResponse)(nil),            // 1: deltamem.StoreResponse
 	(*RecallRequest)(nil),            // 2: deltamem.RecallRequest
@@ -1650,74 +2156,93 @@ var file_proto_deltamem_proto_goTypes = []any{
 	(*AdaptResponse)(nil),            // 24: deltamem.AdaptResponse
 	(*LearnRequest)(nil),             // 25: deltamem.LearnRequest
 	(*ForgetRequest)(nil),            // 26: deltamem.ForgetRequest
+	(*StoreDeepResponse)(nil),        // 27: deltamem.StoreDeepResponse
+	(*ValidateRequest)(nil),          // 28: deltamem.ValidateRequest
+	(*ValidateResponse)(nil),         // 29: deltamem.ValidateResponse
+	(*TemporalRequest)(nil),          // 30: deltamem.TemporalRequest
+	(*TemporalResponse)(nil),         // 31: deltamem.TemporalResponse
+	(*TemporalEvent)(nil),            // 32: deltamem.TemporalEvent
+	(*ConfidenceRequest)(nil),        // 33: deltamem.ConfidenceRequest
+	(*ConfidenceResponse)(nil),       // 34: deltamem.ConfidenceResponse
 }
-var file_proto_deltamem_proto_depIdxs = []int32{
+var file_deltamem_proto_depIdxs = []int32{
 	20, // 0: deltamem.HarvestResponse.thoughts:type_name -> deltamem.ThinkResponse
-	0,  // 1: deltamem.DeltaMem.Store:input_type -> deltamem.StoreRequest
-	2,  // 2: deltamem.DeltaMem.Recall:input_type -> deltamem.RecallRequest
-	4,  // 3: deltamem.DeltaMem.StoreHidden:input_type -> deltamem.HiddenStoreRequest
-	5,  // 4: deltamem.DeltaMem.RecallHidden:input_type -> deltamem.HiddenRecallRequest
-	9,  // 5: deltamem.DeltaMem.Health:input_type -> deltamem.Empty
-	8,  // 6: deltamem.DeltaMem.ResetState:input_type -> deltamem.OwnerRequest
-	10, // 7: deltamem.DeltaMem.IBNNForward:input_type -> deltamem.IBNNForwardRequest
-	11, // 8: deltamem.DeltaMem.IBNNForwardHidden:input_type -> deltamem.IBNNForwardHiddenRequest
-	13, // 9: deltamem.DeltaMem.TurboAdd:input_type -> deltamem.TurboAddRequest
-	15, // 10: deltamem.DeltaMem.TurboSearch:input_type -> deltamem.TurboSearchRequest
-	17, // 11: deltamem.DeltaMem.Generate:input_type -> deltamem.GenerateRequest
-	19, // 12: deltamem.DeltaMem.Think:input_type -> deltamem.ThinkRequest
-	8,  // 13: deltamem.DeltaMem.StartWander:input_type -> deltamem.OwnerRequest
-	8,  // 14: deltamem.DeltaMem.StopWander:input_type -> deltamem.OwnerRequest
-	8,  // 15: deltamem.DeltaMem.HarvestWander:input_type -> deltamem.OwnerRequest
-	22, // 16: deltamem.DeltaMem.AddAxiom:input_type -> deltamem.AxiomRequest
-	23, // 17: deltamem.DeltaMem.Adapt:input_type -> deltamem.AdaptRequest
-	25, // 18: deltamem.DeltaMem.Learn:input_type -> deltamem.LearnRequest
-	26, // 19: deltamem.DeltaMem.Forget:input_type -> deltamem.ForgetRequest
-	1,  // 20: deltamem.DeltaMem.Store:output_type -> deltamem.StoreResponse
-	3,  // 21: deltamem.DeltaMem.Recall:output_type -> deltamem.RecallResponse
-	1,  // 22: deltamem.DeltaMem.StoreHidden:output_type -> deltamem.StoreResponse
-	6,  // 23: deltamem.DeltaMem.RecallHidden:output_type -> deltamem.HiddenRecallResponse
-	7,  // 24: deltamem.DeltaMem.Health:output_type -> deltamem.HealthResponse
-	9,  // 25: deltamem.DeltaMem.ResetState:output_type -> deltamem.Empty
-	12, // 26: deltamem.DeltaMem.IBNNForward:output_type -> deltamem.IBNNForwardResponse
-	12, // 27: deltamem.DeltaMem.IBNNForwardHidden:output_type -> deltamem.IBNNForwardResponse
-	14, // 28: deltamem.DeltaMem.TurboAdd:output_type -> deltamem.TurboAddResponse
-	16, // 29: deltamem.DeltaMem.TurboSearch:output_type -> deltamem.TurboSearchResponse
-	18, // 30: deltamem.DeltaMem.Generate:output_type -> deltamem.GenerateResponse
-	20, // 31: deltamem.DeltaMem.Think:output_type -> deltamem.ThinkResponse
-	9,  // 32: deltamem.DeltaMem.StartWander:output_type -> deltamem.Empty
-	9,  // 33: deltamem.DeltaMem.StopWander:output_type -> deltamem.Empty
-	21, // 34: deltamem.DeltaMem.HarvestWander:output_type -> deltamem.HarvestResponse
-	9,  // 35: deltamem.DeltaMem.AddAxiom:output_type -> deltamem.Empty
-	24, // 36: deltamem.DeltaMem.Adapt:output_type -> deltamem.AdaptResponse
-	9,  // 37: deltamem.DeltaMem.Learn:output_type -> deltamem.Empty
-	9,  // 38: deltamem.DeltaMem.Forget:output_type -> deltamem.Empty
-	20, // [20:39] is the sub-list for method output_type
-	1,  // [1:20] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	32, // 1: deltamem.TemporalResponse.events:type_name -> deltamem.TemporalEvent
+	0,  // 2: deltamem.DeltaMem.Store:input_type -> deltamem.StoreRequest
+	2,  // 3: deltamem.DeltaMem.Recall:input_type -> deltamem.RecallRequest
+	4,  // 4: deltamem.DeltaMem.StoreHidden:input_type -> deltamem.HiddenStoreRequest
+	5,  // 5: deltamem.DeltaMem.RecallHidden:input_type -> deltamem.HiddenRecallRequest
+	9,  // 6: deltamem.DeltaMem.Health:input_type -> deltamem.Empty
+	8,  // 7: deltamem.DeltaMem.ResetState:input_type -> deltamem.OwnerRequest
+	10, // 8: deltamem.DeltaMem.IBNNForward:input_type -> deltamem.IBNNForwardRequest
+	11, // 9: deltamem.DeltaMem.IBNNForwardHidden:input_type -> deltamem.IBNNForwardHiddenRequest
+	13, // 10: deltamem.DeltaMem.TurboAdd:input_type -> deltamem.TurboAddRequest
+	15, // 11: deltamem.DeltaMem.TurboSearch:input_type -> deltamem.TurboSearchRequest
+	17, // 12: deltamem.DeltaMem.Generate:input_type -> deltamem.GenerateRequest
+	19, // 13: deltamem.DeltaMem.Think:input_type -> deltamem.ThinkRequest
+	8,  // 14: deltamem.DeltaMem.StartWander:input_type -> deltamem.OwnerRequest
+	8,  // 15: deltamem.DeltaMem.StopWander:input_type -> deltamem.OwnerRequest
+	8,  // 16: deltamem.DeltaMem.HarvestWander:input_type -> deltamem.OwnerRequest
+	22, // 17: deltamem.DeltaMem.AddAxiom:input_type -> deltamem.AxiomRequest
+	23, // 18: deltamem.DeltaMem.Adapt:input_type -> deltamem.AdaptRequest
+	25, // 19: deltamem.DeltaMem.Learn:input_type -> deltamem.LearnRequest
+	26, // 20: deltamem.DeltaMem.Forget:input_type -> deltamem.ForgetRequest
+	0,  // 21: deltamem.DeltaMem.StoreDeep:input_type -> deltamem.StoreRequest
+	15, // 22: deltamem.DeltaMem.TurbogoSearch:input_type -> deltamem.TurboSearchRequest
+	28, // 23: deltamem.DeltaMem.Validate:input_type -> deltamem.ValidateRequest
+	30, // 24: deltamem.DeltaMem.QueryTemporal:input_type -> deltamem.TemporalRequest
+	33, // 25: deltamem.DeltaMem.AmIConfident:input_type -> deltamem.ConfidenceRequest
+	1,  // 26: deltamem.DeltaMem.Store:output_type -> deltamem.StoreResponse
+	3,  // 27: deltamem.DeltaMem.Recall:output_type -> deltamem.RecallResponse
+	1,  // 28: deltamem.DeltaMem.StoreHidden:output_type -> deltamem.StoreResponse
+	6,  // 29: deltamem.DeltaMem.RecallHidden:output_type -> deltamem.HiddenRecallResponse
+	7,  // 30: deltamem.DeltaMem.Health:output_type -> deltamem.HealthResponse
+	9,  // 31: deltamem.DeltaMem.ResetState:output_type -> deltamem.Empty
+	12, // 32: deltamem.DeltaMem.IBNNForward:output_type -> deltamem.IBNNForwardResponse
+	12, // 33: deltamem.DeltaMem.IBNNForwardHidden:output_type -> deltamem.IBNNForwardResponse
+	14, // 34: deltamem.DeltaMem.TurboAdd:output_type -> deltamem.TurboAddResponse
+	16, // 35: deltamem.DeltaMem.TurboSearch:output_type -> deltamem.TurboSearchResponse
+	18, // 36: deltamem.DeltaMem.Generate:output_type -> deltamem.GenerateResponse
+	20, // 37: deltamem.DeltaMem.Think:output_type -> deltamem.ThinkResponse
+	9,  // 38: deltamem.DeltaMem.StartWander:output_type -> deltamem.Empty
+	9,  // 39: deltamem.DeltaMem.StopWander:output_type -> deltamem.Empty
+	21, // 40: deltamem.DeltaMem.HarvestWander:output_type -> deltamem.HarvestResponse
+	9,  // 41: deltamem.DeltaMem.AddAxiom:output_type -> deltamem.Empty
+	24, // 42: deltamem.DeltaMem.Adapt:output_type -> deltamem.AdaptResponse
+	9,  // 43: deltamem.DeltaMem.Learn:output_type -> deltamem.Empty
+	9,  // 44: deltamem.DeltaMem.Forget:output_type -> deltamem.Empty
+	27, // 45: deltamem.DeltaMem.StoreDeep:output_type -> deltamem.StoreDeepResponse
+	16, // 46: deltamem.DeltaMem.TurbogoSearch:output_type -> deltamem.TurboSearchResponse
+	29, // 47: deltamem.DeltaMem.Validate:output_type -> deltamem.ValidateResponse
+	31, // 48: deltamem.DeltaMem.QueryTemporal:output_type -> deltamem.TemporalResponse
+	34, // 49: deltamem.DeltaMem.AmIConfident:output_type -> deltamem.ConfidenceResponse
+	26, // [26:50] is the sub-list for method output_type
+	2,  // [2:26] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_proto_deltamem_proto_init() }
-func file_proto_deltamem_proto_init() {
-	if File_proto_deltamem_proto != nil {
+func init() { file_deltamem_proto_init() }
+func file_deltamem_proto_init() {
+	if File_deltamem_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_deltamem_proto_rawDesc), len(file_proto_deltamem_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_deltamem_proto_rawDesc), len(file_deltamem_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   27,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_deltamem_proto_goTypes,
-		DependencyIndexes: file_proto_deltamem_proto_depIdxs,
-		MessageInfos:      file_proto_deltamem_proto_msgTypes,
+		GoTypes:           file_deltamem_proto_goTypes,
+		DependencyIndexes: file_deltamem_proto_depIdxs,
+		MessageInfos:      file_deltamem_proto_msgTypes,
 	}.Build()
-	File_proto_deltamem_proto = out.File
-	file_proto_deltamem_proto_goTypes = nil
-	file_proto_deltamem_proto_depIdxs = nil
+	File_deltamem_proto = out.File
+	file_deltamem_proto_goTypes = nil
+	file_deltamem_proto_depIdxs = nil
 }

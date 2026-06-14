@@ -158,3 +158,47 @@ func (g *GRPCService) Learn(ctx context.Context, req *pb.LearnRequest) (*pb.Empt
 func (g *GRPCService) Forget(ctx context.Context, req *pb.ForgetRequest) (*pb.Empty, error) {
 	return &pb.Empty{}, g.Svc.Forget(ctx, req.Owner, req.What)
 }
+
+// === Full-pipeline RPCs ===
+
+func (g *GRPCService) StoreDeep(ctx context.Context, req *pb.StoreRequest) (*pb.StoreDeepResponse, error) {
+	norm, err := g.Svc.StoreDeep(ctx, req.Owner, req.Key, req.Content)
+	if err != nil { return nil, err }
+	id := req.Key
+	if len(id) > 60 { id = id[:60] }
+	return &pb.StoreDeepResponse{
+		Ok: true, StateNorm: norm,
+		IbnnReinforced: 0.03,
+		TurbogoId: id, TurbovecId: id,
+	}, nil
+}
+
+func (g *GRPCService) TurbogoSearch(ctx context.Context, req *pb.TurboSearchRequest) (*pb.TurboSearchResponse, error) {
+	ids, scores, err := g.Svc.TurbogoSearch(ctx, req.Owner, req.Query, int(req.K))
+	if err != nil { return nil, err }
+	return &pb.TurboSearchResponse{Ids: ids, Scores: scores}, nil
+}
+
+func (g *GRPCService) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+	valid, grounding, coherence, reason, contradictions := g.Svc.Validate(ctx, req.Owner, req.Statement)
+	return &pb.ValidateResponse{
+		Valid: valid, Grounding: grounding, Coherence: coherence,
+		Reason: reason, Contradictions: contradictions,
+	}, nil
+}
+
+func (g *GRPCService) QueryTemporal(ctx context.Context, req *pb.TemporalRequest) (*pb.TemporalResponse, error) {
+	events := g.Svc.QueryTemporal(req.Owner, int(req.Limit))
+	resp := &pb.TemporalResponse{}
+	for _, e := range events {
+		resp.Events = append(resp.Events, &pb.TemporalEvent{
+			Id: e.ID, Content: e.Content, When: e.When.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+	return resp, nil
+}
+
+func (g *GRPCService) AmIConfident(ctx context.Context, req *pb.ConfidenceRequest) (*pb.ConfidenceResponse, error) {
+	level, raw := g.Svc.AmIConfident(ctx, req.Owner, req.Text)
+	return &pb.ConfidenceResponse{Level: int32(level), RawScore: raw}, nil
+}
