@@ -82,6 +82,17 @@ func main() {
 		fmt.Printf("owners=%d stores=%d recalls=%d uptime=%s\n",
 			resp.OwnersActive, resp.TotalStores, resp.TotalRecalls, resp.Uptime)
 
+	case "create-token":
+		if len(args) < 2 { fatal("create-token <owner-name>") }
+		tokenOwner := args[1]
+		body := fmt.Sprintf(`{"owner":"%s"}`, tokenOwner)
+		resp, err := http.Post(*addr+"/enroll", "application/json", strings.NewReader(body))
+		if err != nil { fatal("enroll: %v", err) }
+		defer resp.Body.Close()
+		var result struct{ Token string `json:"token"`; Owner string `json:"owner"` }
+		json.NewDecoder(resp.Body).Decode(&result)
+		fmt.Printf("owner: %s\ntoken: %s\n\nUsage:\n  mem-cli --grpc-addr %s store --key K --content C\n  # Token auto-saved. Or set MEMGO_TOKEN=%s\n", result.Owner, result.Token, *grpcAddr, result.Token)
+
 	default:
 		usage()
 		os.Exit(1)
@@ -99,7 +110,7 @@ func parseKV(args []string) (key, content string) {
 }
 
 func usage() {
-	fmt.Println(`mem-cli — gRPC client for δ-mem-go
+	fmt.Println(`mem-cli — client for δ-mem-go
 
 Commands:
   store --key <key> --content <text>   Store a fact
@@ -108,10 +119,12 @@ Commands:
   adapt <wrong> <right>                Correct a misconception
   learn <fact>                         Absorb a new fact
   health                               Check server status
+  create-token <owner>                 Generate a service token for an agent/user
 
 Flags:
-  --addr    gRPC address (default: localhost:19090)
-  --owner   Owner name (default: $USERNAME)`)
+  --addr       HTTP address for enrollment (default: http://localhost:18080)
+  --grpc-addr  gRPC address for operations (default: localhost:19090)
+  --owner      Owner name for auto-enrollment (default: $USERNAME)`)
 }
 
 func fatal(format string, args ...interface{}) {
