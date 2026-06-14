@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -76,6 +77,67 @@ func main() {
 		if err != nil { fatal("learn: %v", err) }
 		fmt.Println("learned")
 
+	case "forget":
+		what := strings.Join(args[1:], " ")
+		_, err := client.Forget(ctx, &pb.ForgetRequest{Owner: *owner, What: what})
+		if err != nil { fatal("forget: %v", err) }
+		fmt.Println("forgotten")
+
+	case "undo":
+		if len(args) < 3 { fatal("undo <original-wrong> <original-right>") }
+		// Undo calls Adapt in reverse
+		resp, err := client.Adapt(ctx, &pb.AdaptRequest{Owner: *owner, Wrong: args[2], Right: args[1]})
+		if err != nil { fatal("undo: %v", err) }
+		fmt.Printf("undone: impact=%.4f\n", resp.Impact)
+
+	case "axiom":
+		statement := strings.Join(args[1:], " ")
+		_, err := client.AddAxiom(ctx, &pb.AxiomRequest{Statement: statement, Domain: ""})
+		if err != nil { fatal("axiom: %v", err) }
+		fmt.Printf("axiom set: %s\n", statement)
+
+	case "wander":
+		if len(args) < 2 { fatal("wander start|stop|harvest") }
+		switch args[1] {
+		case "start":
+			_, err := client.StartWander(ctx, &pb.OwnerRequest{Owner: *owner})
+			if err != nil { fatal("wander start: %v", err) }
+			fmt.Println("wander started")
+		case "stop":
+			_, err := client.StopWander(ctx, &pb.OwnerRequest{Owner: *owner})
+			if err != nil { fatal("wander stop: %v", err) }
+			fmt.Println("wander stopped")
+		case "harvest":
+			resp, err := client.HarvestWander(ctx, &pb.OwnerRequest{Owner: *owner})
+			if err != nil { fatal("wander harvest: %v", err) }
+			if resp == nil || len(resp.Thoughts) == 0 {
+				fmt.Println("no spontaneous thoughts yet")
+			} else {
+				for i, t := range resp.Thoughts {
+					fmt.Printf("  [%d] %s\n", i+1, t.Idea)
+				}
+			}
+		default:
+			fatal("wander start|stop|harvest")
+		}
+
+	case "initiate":
+		// HTTP path — sends training file to /initiate
+		filePath := ""
+		for i, a := range args[1:] {
+			if a == "--file" && i+1 < len(args[1:])-1 { filePath = args[i+2] }
+		}
+		if filePath == "" && len(args) > 1 { filePath = args[1] }
+		if filePath == "" { fatal("initiate --file <path-to-training-data>") }
+		data, err := os.ReadFile(filePath)
+		if err != nil { fatal("read file: %v", err) }
+		body := fmt.Sprintf(`{"owner":"%s","text":%s,"epochs":5}`, *owner, jsonEscape(string(data)))
+		resp, err := http.Post(*addr+"/initiate", "application/json", strings.NewReader(body))
+		if err != nil { fatal("initiate: %v", err) }
+		defer resp.Body.Close()
+		out, _ := io.ReadAll(resp.Body)
+		fmt.Println(string(out))
+
 	case "health":
 		resp, err := client.Health(ctx, &pb.Empty{})
 		if err != nil { fatal("health: %v", err) }
@@ -112,19 +174,31 @@ func parseKV(args []string) (key, content string) {
 func usage() {
 	fmt.Println(`mem-cli — client for δ-mem-go
 
-Commands:
+Data Operations (gRPC):
   store --key <key> --content <text>   Store a fact
   recall <query>                        Recall related knowledge
   think <seed1> <seed2> ...            Synthesize a thought
   adapt <wrong> <right>                Correct a misconception
   learn <fact>                         Absorb a new fact
+  forget <text>                        Fade a memory
+  undo <original-wrong> <original-right>  Reverse a correction
+  axiom <statement>                    Add immutable truth constraint
+  wander start|stop|harvest            Spontaneous thought control
   health                               Check server status
-  create-token <owner>                 Generate a service token for an agent/user
+
+Setup Operations (HTTP):
+  initiate --file <path>               Train on domain data (first-time)
+  create-token <owner>                 Generate service token for agent
 
 Flags:
-  --addr       HTTP address for enrollment (default: http://localhost:18080)
-  --grpc-addr  gRPC address for operations (default: localhost:19090)
+  --addr       HTTP address (default: http://localhost:18080)
+  --grpc-addr  gRPC address (default: localhost:19090)
   --owner      Owner name for auto-enrollment (default: $USERNAME)`)
+}
+
+func jsonEscape(s string) string {
+	b, _ := json.Marshal(s)
+	return string(b)
 }
 
 func fatal(format string, args ...interface{}) {
