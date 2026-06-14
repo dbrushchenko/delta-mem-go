@@ -2,20 +2,25 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 
 	pb "github.com/dbrushchenko/delta-mem-go/proto"
 )
 
 func main() {
-	addr := flag.String("addr", "localhost:19090", "gRPC server address")
+	addr := flag.String("addr", "http://localhost:18080", "server address")
+	grpcAddr := flag.String("grpc-addr", "localhost:19090", "gRPC address")
 	owner := flag.String("owner", os.Getenv("USERNAME"), "owner name")
 	flag.Parse()
 
@@ -25,7 +30,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Auto-enroll: get or create token transparently
+	token := getOrEnrollToken(*addr, *owner)
+
+	conn, err := grpc.NewClient(*grpcAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(tokenInterceptor(token)),
+	)
 	if err != nil { fatal("connect: %v", err) }
 	defer conn.Close()
 	client := pb.NewDeltaMemClient(conn)
@@ -106,4 +117,46 @@ Flags:
 func fatal(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "error: "+format+"\n", args...)
 	os.Exit(1)
+}
+
+// --- Token management ---
+
+func tokenPath() string {
+	dir := filepath.Join(os.Getenv("USERPROFILE"), ".memgo")
+	if dir == filepath.Join("", ".memgo") {
+		dir = filepath.Join(os.Getenv("HOME"), ".memgo")
+	}
+	os.MkdirAll(dir, 0700)
+	return filepath.Join(dir, "token")
+}
+
+// getOrEnrollToken reads saved token or auto-enrolls transparently.
+func getOrEnrollToken(serverAddr, owner string) string {
+	path := tokenPath()
+	// Try reading existing token
+	if data, err := os.ReadFile(path); err == nil {
+		tok := strings.TrimSpace(string(data))
+		if tok != "" { return tok }
+	}
+	// Auto-enroll via HTTP
+	body := fmt.Sprintf(`{"owner":"%s"}`, owner)
+	resp, err := http.Post(serverAddr+"/enroll", "application/json", strings.NewReader(body))
+	if err != nil { return "" } // server not available, proceed without token
+	defer resp.Body.Close()
+	var result struct{ Token string `json:"token"` }
+	json.NewDecoder(resp.Body).Decode(&result)
+	if result.Token != "" {
+		os.WriteFile(path, []byte(result.Token), 0600)
+	}
+	return result.Token
+}
+
+// tokenInterceptor adds the bearer token to every gRPC call.
+func tokenInterceptor(token string) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		if token != "" {
+			ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token)
+		}
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
 }
