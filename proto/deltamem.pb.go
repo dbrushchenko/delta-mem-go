@@ -1899,6 +1899,83 @@ func (x *ConfidenceRequest) GetText() string {
 	return ""
 }
 
+// Session-aware search
+type SessionSearchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Owner         string                 `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	Query         []float32              `protobuf:"fixed32,2,rep,packed,name=query,proto3" json:"query,omitempty"`
+	K             int32                  `protobuf:"varint,3,opt,name=k,proto3" json:"k,omitempty"`
+	SessionId     string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`       // client-provided or auto-generated
+	SessionType   string                 `protobuf:"bytes,5,opt,name=session_type,json=sessionType,proto3" json:"session_type,omitempty"` // hook-light, hook-standard, hook-deep, agent-mcp, cli
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionSearchRequest) Reset() {
+	*x = SessionSearchRequest{}
+	mi := &file_deltamem_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionSearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionSearchRequest) ProtoMessage() {}
+
+func (x *SessionSearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_deltamem_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionSearchRequest.ProtoReflect.Descriptor instead.
+func (*SessionSearchRequest) Descriptor() ([]byte, []int) {
+	return file_deltamem_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *SessionSearchRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *SessionSearchRequest) GetQuery() []float32 {
+	if x != nil {
+		return x.Query
+	}
+	return nil
+}
+
+func (x *SessionSearchRequest) GetK() int32 {
+	if x != nil {
+		return x.K
+	}
+	return 0
+}
+
+func (x *SessionSearchRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionSearchRequest) GetSessionType() string {
+	if x != nil {
+		return x.SessionType
+	}
+	return ""
+}
+
 type ConfidenceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Level         int32                  `protobuf:"varint,1,opt,name=level,proto3" json:"level,omitempty"` // 0=NeverSeen, 1=Low, 2=Medium, 3=High
@@ -1909,7 +1986,7 @@ type ConfidenceResponse struct {
 
 func (x *ConfidenceResponse) Reset() {
 	*x = ConfidenceResponse{}
-	mi := &file_deltamem_proto_msgTypes[34]
+	mi := &file_deltamem_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1921,7 +1998,7 @@ func (x *ConfidenceResponse) String() string {
 func (*ConfidenceResponse) ProtoMessage() {}
 
 func (x *ConfidenceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_deltamem_proto_msgTypes[34]
+	mi := &file_deltamem_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1934,7 +2011,7 @@ func (x *ConfidenceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfidenceResponse.ProtoReflect.Descriptor instead.
 func (*ConfidenceResponse) Descriptor() ([]byte, []int) {
-	return file_deltamem_proto_rawDescGZIP(), []int{34}
+	return file_deltamem_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ConfidenceResponse) GetLevel() int32 {
@@ -2083,10 +2160,17 @@ const file_deltamem_proto_rawDesc = "" +
 	"\x04when\x18\x03 \x01(\tR\x04when\"=\n" +
 	"\x11ConfidenceRequest\x12\x14\n" +
 	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x12\n" +
-	"\x04text\x18\x02 \x01(\tR\x04text\"G\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\"\x92\x01\n" +
+	"\x14SessionSearchRequest\x12\x14\n" +
+	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x14\n" +
+	"\x05query\x18\x02 \x03(\x02R\x05query\x12\f\n" +
+	"\x01k\x18\x03 \x01(\x05R\x01k\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12!\n" +
+	"\fsession_type\x18\x05 \x01(\tR\vsessionType\"G\n" +
 	"\x12ConfidenceResponse\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\x05R\x05level\x12\x1b\n" +
-	"\traw_score\x18\x02 \x01(\x02R\brawScore2\xa0\f\n" +
+	"\traw_score\x18\x02 \x01(\x02R\brawScore2\xf0\f\n" +
 	"\bDeltaMem\x128\n" +
 	"\x05Store\x12\x16.deltamem.StoreRequest\x1a\x17.deltamem.StoreResponse\x12;\n" +
 	"\x06Recall\x12\x17.deltamem.RecallRequest\x1a\x18.deltamem.RecallResponse\x12D\n" +
@@ -2110,7 +2194,8 @@ const file_deltamem_proto_rawDesc = "" +
 	"\x05Learn\x12\x16.deltamem.LearnRequest\x1a\x0f.deltamem.Empty\x122\n" +
 	"\x06Forget\x12\x17.deltamem.ForgetRequest\x1a\x0f.deltamem.Empty\x12@\n" +
 	"\tStoreDeep\x12\x16.deltamem.StoreRequest\x1a\x1b.deltamem.StoreDeepResponse\x12L\n" +
-	"\rTurbogoSearch\x12\x1c.deltamem.TurboSearchRequest\x1a\x1d.deltamem.TurboSearchResponse\x12A\n" +
+	"\rTurbogoSearch\x12\x1c.deltamem.TurboSearchRequest\x1a\x1d.deltamem.TurboSearchResponse\x12N\n" +
+	"\rSessionSearch\x12\x1e.deltamem.SessionSearchRequest\x1a\x1d.deltamem.TurboSearchResponse\x12A\n" +
 	"\bValidate\x12\x19.deltamem.ValidateRequest\x1a\x1a.deltamem.ValidateResponse\x12F\n" +
 	"\rQueryTemporal\x12\x19.deltamem.TemporalRequest\x1a\x1a.deltamem.TemporalResponse\x12I\n" +
 	"\fAmIConfident\x12\x1b.deltamem.ConfidenceRequest\x1a\x1c.deltamem.ConfidenceResponseB,Z*github.com/dbrushchenko/delta-mem-go/protob\x06proto3"
@@ -2127,7 +2212,7 @@ func file_deltamem_proto_rawDescGZIP() []byte {
 	return file_deltamem_proto_rawDescData
 }
 
-var file_deltamem_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_deltamem_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_deltamem_proto_goTypes = []any{
 	(*StoreRequest)(nil),             // 0: deltamem.StoreRequest
 	(*StoreResponse)(nil),            // 1: deltamem.StoreResponse
@@ -2163,7 +2248,8 @@ var file_deltamem_proto_goTypes = []any{
 	(*TemporalResponse)(nil),         // 31: deltamem.TemporalResponse
 	(*TemporalEvent)(nil),            // 32: deltamem.TemporalEvent
 	(*ConfidenceRequest)(nil),        // 33: deltamem.ConfidenceRequest
-	(*ConfidenceResponse)(nil),       // 34: deltamem.ConfidenceResponse
+	(*SessionSearchRequest)(nil),     // 34: deltamem.SessionSearchRequest
+	(*ConfidenceResponse)(nil),       // 35: deltamem.ConfidenceResponse
 }
 var file_deltamem_proto_depIdxs = []int32{
 	20, // 0: deltamem.HarvestResponse.thoughts:type_name -> deltamem.ThinkResponse
@@ -2189,35 +2275,37 @@ var file_deltamem_proto_depIdxs = []int32{
 	26, // 20: deltamem.DeltaMem.Forget:input_type -> deltamem.ForgetRequest
 	0,  // 21: deltamem.DeltaMem.StoreDeep:input_type -> deltamem.StoreRequest
 	15, // 22: deltamem.DeltaMem.TurbogoSearch:input_type -> deltamem.TurboSearchRequest
-	28, // 23: deltamem.DeltaMem.Validate:input_type -> deltamem.ValidateRequest
-	30, // 24: deltamem.DeltaMem.QueryTemporal:input_type -> deltamem.TemporalRequest
-	33, // 25: deltamem.DeltaMem.AmIConfident:input_type -> deltamem.ConfidenceRequest
-	1,  // 26: deltamem.DeltaMem.Store:output_type -> deltamem.StoreResponse
-	3,  // 27: deltamem.DeltaMem.Recall:output_type -> deltamem.RecallResponse
-	1,  // 28: deltamem.DeltaMem.StoreHidden:output_type -> deltamem.StoreResponse
-	6,  // 29: deltamem.DeltaMem.RecallHidden:output_type -> deltamem.HiddenRecallResponse
-	7,  // 30: deltamem.DeltaMem.Health:output_type -> deltamem.HealthResponse
-	9,  // 31: deltamem.DeltaMem.ResetState:output_type -> deltamem.Empty
-	12, // 32: deltamem.DeltaMem.IBNNForward:output_type -> deltamem.IBNNForwardResponse
-	12, // 33: deltamem.DeltaMem.IBNNForwardHidden:output_type -> deltamem.IBNNForwardResponse
-	14, // 34: deltamem.DeltaMem.TurboAdd:output_type -> deltamem.TurboAddResponse
-	16, // 35: deltamem.DeltaMem.TurboSearch:output_type -> deltamem.TurboSearchResponse
-	18, // 36: deltamem.DeltaMem.Generate:output_type -> deltamem.GenerateResponse
-	20, // 37: deltamem.DeltaMem.Think:output_type -> deltamem.ThinkResponse
-	9,  // 38: deltamem.DeltaMem.StartWander:output_type -> deltamem.Empty
-	9,  // 39: deltamem.DeltaMem.StopWander:output_type -> deltamem.Empty
-	21, // 40: deltamem.DeltaMem.HarvestWander:output_type -> deltamem.HarvestResponse
-	9,  // 41: deltamem.DeltaMem.AddAxiom:output_type -> deltamem.Empty
-	24, // 42: deltamem.DeltaMem.Adapt:output_type -> deltamem.AdaptResponse
-	9,  // 43: deltamem.DeltaMem.Learn:output_type -> deltamem.Empty
-	9,  // 44: deltamem.DeltaMem.Forget:output_type -> deltamem.Empty
-	27, // 45: deltamem.DeltaMem.StoreDeep:output_type -> deltamem.StoreDeepResponse
-	16, // 46: deltamem.DeltaMem.TurbogoSearch:output_type -> deltamem.TurboSearchResponse
-	29, // 47: deltamem.DeltaMem.Validate:output_type -> deltamem.ValidateResponse
-	31, // 48: deltamem.DeltaMem.QueryTemporal:output_type -> deltamem.TemporalResponse
-	34, // 49: deltamem.DeltaMem.AmIConfident:output_type -> deltamem.ConfidenceResponse
-	26, // [26:50] is the sub-list for method output_type
-	2,  // [2:26] is the sub-list for method input_type
+	34, // 23: deltamem.DeltaMem.SessionSearch:input_type -> deltamem.SessionSearchRequest
+	28, // 24: deltamem.DeltaMem.Validate:input_type -> deltamem.ValidateRequest
+	30, // 25: deltamem.DeltaMem.QueryTemporal:input_type -> deltamem.TemporalRequest
+	33, // 26: deltamem.DeltaMem.AmIConfident:input_type -> deltamem.ConfidenceRequest
+	1,  // 27: deltamem.DeltaMem.Store:output_type -> deltamem.StoreResponse
+	3,  // 28: deltamem.DeltaMem.Recall:output_type -> deltamem.RecallResponse
+	1,  // 29: deltamem.DeltaMem.StoreHidden:output_type -> deltamem.StoreResponse
+	6,  // 30: deltamem.DeltaMem.RecallHidden:output_type -> deltamem.HiddenRecallResponse
+	7,  // 31: deltamem.DeltaMem.Health:output_type -> deltamem.HealthResponse
+	9,  // 32: deltamem.DeltaMem.ResetState:output_type -> deltamem.Empty
+	12, // 33: deltamem.DeltaMem.IBNNForward:output_type -> deltamem.IBNNForwardResponse
+	12, // 34: deltamem.DeltaMem.IBNNForwardHidden:output_type -> deltamem.IBNNForwardResponse
+	14, // 35: deltamem.DeltaMem.TurboAdd:output_type -> deltamem.TurboAddResponse
+	16, // 36: deltamem.DeltaMem.TurboSearch:output_type -> deltamem.TurboSearchResponse
+	18, // 37: deltamem.DeltaMem.Generate:output_type -> deltamem.GenerateResponse
+	20, // 38: deltamem.DeltaMem.Think:output_type -> deltamem.ThinkResponse
+	9,  // 39: deltamem.DeltaMem.StartWander:output_type -> deltamem.Empty
+	9,  // 40: deltamem.DeltaMem.StopWander:output_type -> deltamem.Empty
+	21, // 41: deltamem.DeltaMem.HarvestWander:output_type -> deltamem.HarvestResponse
+	9,  // 42: deltamem.DeltaMem.AddAxiom:output_type -> deltamem.Empty
+	24, // 43: deltamem.DeltaMem.Adapt:output_type -> deltamem.AdaptResponse
+	9,  // 44: deltamem.DeltaMem.Learn:output_type -> deltamem.Empty
+	9,  // 45: deltamem.DeltaMem.Forget:output_type -> deltamem.Empty
+	27, // 46: deltamem.DeltaMem.StoreDeep:output_type -> deltamem.StoreDeepResponse
+	16, // 47: deltamem.DeltaMem.TurbogoSearch:output_type -> deltamem.TurboSearchResponse
+	16, // 48: deltamem.DeltaMem.SessionSearch:output_type -> deltamem.TurboSearchResponse
+	29, // 49: deltamem.DeltaMem.Validate:output_type -> deltamem.ValidateResponse
+	31, // 50: deltamem.DeltaMem.QueryTemporal:output_type -> deltamem.TemporalResponse
+	35, // 51: deltamem.DeltaMem.AmIConfident:output_type -> deltamem.ConfidenceResponse
+	27, // [27:52] is the sub-list for method output_type
+	2,  // [2:27] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -2234,7 +2322,7 @@ func file_deltamem_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_deltamem_proto_rawDesc), len(file_deltamem_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   35,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

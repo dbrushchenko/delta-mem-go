@@ -40,6 +40,7 @@ const (
 	DeltaMem_Forget_FullMethodName            = "/deltamem.DeltaMem/Forget"
 	DeltaMem_StoreDeep_FullMethodName         = "/deltamem.DeltaMem/StoreDeep"
 	DeltaMem_TurbogoSearch_FullMethodName     = "/deltamem.DeltaMem/TurbogoSearch"
+	DeltaMem_SessionSearch_FullMethodName     = "/deltamem.DeltaMem/SessionSearch"
 	DeltaMem_Validate_FullMethodName          = "/deltamem.DeltaMem/Validate"
 	DeltaMem_QueryTemporal_FullMethodName     = "/deltamem.DeltaMem/QueryTemporal"
 	DeltaMem_AmIConfident_FullMethodName      = "/deltamem.DeltaMem/AmIConfident"
@@ -74,6 +75,7 @@ type DeltaMemClient interface {
 	// Full-pipeline RPCs — all layers wired
 	StoreDeep(ctx context.Context, in *StoreRequest, opts ...grpc.CallOption) (*StoreDeepResponse, error)
 	TurbogoSearch(ctx context.Context, in *TurboSearchRequest, opts ...grpc.CallOption) (*TurboSearchResponse, error)
+	SessionSearch(ctx context.Context, in *SessionSearchRequest, opts ...grpc.CallOption) (*TurboSearchResponse, error)
 	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
 	QueryTemporal(ctx context.Context, in *TemporalRequest, opts ...grpc.CallOption) (*TemporalResponse, error)
 	AmIConfident(ctx context.Context, in *ConfidenceRequest, opts ...grpc.CallOption) (*ConfidenceResponse, error)
@@ -297,6 +299,16 @@ func (c *deltaMemClient) TurbogoSearch(ctx context.Context, in *TurboSearchReque
 	return out, nil
 }
 
+func (c *deltaMemClient) SessionSearch(ctx context.Context, in *SessionSearchRequest, opts ...grpc.CallOption) (*TurboSearchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TurboSearchResponse)
+	err := c.cc.Invoke(ctx, DeltaMem_SessionSearch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deltaMemClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ValidateResponse)
@@ -356,6 +368,7 @@ type DeltaMemServer interface {
 	// Full-pipeline RPCs — all layers wired
 	StoreDeep(context.Context, *StoreRequest) (*StoreDeepResponse, error)
 	TurbogoSearch(context.Context, *TurboSearchRequest) (*TurboSearchResponse, error)
+	SessionSearch(context.Context, *SessionSearchRequest) (*TurboSearchResponse, error)
 	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
 	QueryTemporal(context.Context, *TemporalRequest) (*TemporalResponse, error)
 	AmIConfident(context.Context, *ConfidenceRequest) (*ConfidenceResponse, error)
@@ -431,6 +444,9 @@ func (UnimplementedDeltaMemServer) StoreDeep(context.Context, *StoreRequest) (*S
 }
 func (UnimplementedDeltaMemServer) TurbogoSearch(context.Context, *TurboSearchRequest) (*TurboSearchResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TurbogoSearch not implemented")
+}
+func (UnimplementedDeltaMemServer) SessionSearch(context.Context, *SessionSearchRequest) (*TurboSearchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SessionSearch not implemented")
 }
 func (UnimplementedDeltaMemServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Validate not implemented")
@@ -840,6 +856,24 @@ func _DeltaMem_TurbogoSearch_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeltaMem_SessionSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SessionSearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeltaMemServer).SessionSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeltaMem_SessionSearch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeltaMemServer).SessionSearch(ctx, req.(*SessionSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeltaMem_Validate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ValidateRequest)
 	if err := dec(in); err != nil {
@@ -984,6 +1018,10 @@ var DeltaMem_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TurbogoSearch",
 			Handler:    _DeltaMem_TurbogoSearch_Handler,
+		},
+		{
+			MethodName: "SessionSearch",
+			Handler:    _DeltaMem_SessionSearch_Handler,
 		},
 		{
 			MethodName: "Validate",

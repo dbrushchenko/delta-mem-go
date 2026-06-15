@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"github.com/dbrushchenko/delta-mem-go/internal/session"
 	pb "github.com/dbrushchenko/delta-mem-go/proto"
 )
 
@@ -201,4 +202,23 @@ func (g *GRPCService) QueryTemporal(ctx context.Context, req *pb.TemporalRequest
 func (g *GRPCService) AmIConfident(ctx context.Context, req *pb.ConfidenceRequest) (*pb.ConfidenceResponse, error) {
 	level, raw := g.Svc.AmIConfident(ctx, req.Owner, req.Text)
 	return &pb.ConfidenceResponse{Level: int32(level), RawScore: raw}, nil
+}
+
+func (g *GRPCService) SessionSearch(ctx context.Context, req *pb.SessionSearchRequest) (*pb.TurboSearchResponse, error) {
+	st := parseSessionType(req.SessionType)
+	ids, scores, err := g.Svc.SessionSearch(ctx, req.SessionId, req.Owner, st, req.Query, int(req.K))
+	if err != nil { return nil, err }
+	return &pb.TurboSearchResponse{Ids: ids, Scores: scores}, nil
+}
+
+func parseSessionType(s string) session.SessionType {
+	switch s {
+	case "hook-light": return session.HookLight
+	case "hook-standard": return session.HookStandard
+	case "hook-deep": return session.HookDeep
+	case "agent-mcp": return session.AgentMCP
+	case "think": return session.ThinkSession
+	case "cli": return session.CLISession
+	default: return session.HookStandard
+	}
 }

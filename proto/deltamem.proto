@@ -33,6 +33,7 @@ service DeltaMem {
   // Full-pipeline RPCs — all layers wired
   rpc StoreDeep(StoreRequest) returns (StoreDeepResponse);
   rpc TurbogoSearch(TurboSearchRequest) returns (TurboSearchResponse);
+  rpc SessionSearch(SessionSearchRequest) returns (TurboSearchResponse);
   rpc Validate(ValidateRequest) returns (ValidateResponse);
   rpc QueryTemporal(TemporalRequest) returns (TemporalResponse);
   rpc AmIConfident(ConfidenceRequest) returns (ConfidenceResponse);
@@ -225,6 +226,15 @@ message TemporalEvent {
 message ConfidenceRequest {
   string owner = 1;
   string text = 2;
+}
+
+// Session-aware search
+message SessionSearchRequest {
+  string owner = 1;
+  repeated float query = 2;
+  int32 k = 3;
+  string session_id = 4;    // client-provided or auto-generated
+  string session_type = 5;  // hook-light, hook-standard, hook-deep, agent-mcp, cli
 }
 
 message ConfidenceResponse {
