@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dbrushchenko/delta-mem-go/internal/server"
+	"github.com/dbrushchenko/delta-mem-go/internal/session"
 )
 
 // RegisterTools wires all δ-mem-go service methods as MCP tools.
@@ -187,6 +188,74 @@ func RegisterTools(h *Handler, svc *server.Service) {
 			return fmt.Sprintf("owners=%d stores=%d recalls=%d uptime=%s", owners, stores, recalls, uptime), nil
 		},
 	})
+
+	// Session-aware search and management
+	h.AddTool(Tool{
+		Name: "dmem_session_search", Description: "Session-aware search. Respects budget, dedup, staleness. Won't repeat results already shown this session.",
+		InputSchema: Schema(map[string]any{"query": StringProp("search text"), "session_id": StringProp("session ID (auto-generated if empty)"), "session_type": StringProp("hook-light|hook-standard|hook-deep|agent-mcp|cli"), "max_chars": IntProp("label length", 200), "owner": StringProp("owner name")}, "query"),
+		Fn: func(args map[string]any) (string, error) {
+			owner := str(args, "owner")
+			sid := str(args, "session_id")
+			if sid == "" { sid = "mcp-" + owner }
+			stStr := str(args, "session_type")
+			if stStr == "" { stStr = "agent-mcp" }
+			maxChars := intVal(args, "max_chars", 200)
+			// Embed query
+			emb, err := svc.IBNNForward(context.Background(), owner, str(args, "query"))
+			if err != nil { return "", err }
+			// Parse session type
+			var st session.SessionType
+			switch stStr {
+			case "hook-light": st = session.HookLight
+			case "hook-standard": st = session.HookStandard
+			case "hook-deep": st = session.HookDeep
+			case "agent-mcp": st = session.AgentMCP
+			case "think": st = session.ThinkSession
+			case "cli": st = session.CLISession
+			default: st = session.AgentMCP
+			}
+			ids, scores, err := svc.SessionSearch(context.Background(), sid, owner, st, emb, 5)
+			if err != nil { return "", err }
+			var lines []string
+			for i, id := range ids {
+				label := id
+				if len(label) > maxChars { label = label[:maxChars] }
+				lines = append(lines, fmt.Sprintf("[%d] %.4f  %s", i+1, scores[i], label))
+			}
+			if len(lines) == 0 { return "(no new results — budget exhausted or all seen this session)", nil }
+			return strings.Join(lines, "\n"), nil
+		},
+	})
+
+	h.AddTool(Tool{
+		Name: "dmem_session_status", Description: "Session status: injected count, tokens used, budget remaining.",
+		InputSchema: Schema(map[string]any{"session_id": StringProp("session ID"), "owner": StringProp("owner name")}),
+		Fn: func(args map[string]any) (string, error) {
+			owner := str(args, "owner")
+			sid := str(args, "session_id")
+			if sid == "" { sid = "mcp-" + owner }
+			sess := svc.Sessions().GetOrCreate(sid, owner, session.AgentMCP)
+			remaining := sess.Policy.TokenBudget - sess.TokensUsed
+			return fmt.Sprintf("session=%s turns=%d injected=%d tokens_used=%d budget_remaining=%d",
+				sid, sess.TurnCount, len(sess.Injected), sess.TokensUsed, remaining), nil
+		},
+	})
+
+	h.AddTool(Tool{
+		Name: "dmem_session_reset", Description: "Reset a session. Clears dedup and budget — all memories become eligible for re-injection. Tracking restarts from zero.",
+		InputSchema: Schema(map[string]any{"session_id": StringProp("session ID to reset"), "owner": StringProp("owner name")}),
+		Fn: func(args map[string]any) (string, error) {
+			owner := str(args, "owner")
+			sid := str(args, "session_id")
+			if sid == "" { sid = "mcp-" + owner }
+			summary := svc.Sessions().Close(sid)
+			if summary != nil {
+				return fmt.Sprintf("session closed (was: turns=%d injected=%d tokens=%d) — tracking restarted",
+					summary.Turns, summary.Injected, summary.TokensUsed), nil
+			}
+			return "session reset — tracking restarted from zero", nil
+		},
+	})
 }
 
 func str(args map[string]any, key string) string {
@@ -198,3 +267,4 @@ func intVal(args map[string]any, key string, def int) int {
 	if v, ok := args[key].(float64); ok { return int(v) }
 	return def
 }
+
