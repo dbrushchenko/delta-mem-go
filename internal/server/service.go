@@ -11,6 +11,7 @@ import (
 	"github.com/dbrushchenko/delta-mem-go/internal/embeddings"
 	"github.com/dbrushchenko/delta-mem-go/internal/gemma"
 	"github.com/dbrushchenko/delta-mem-go/internal/ibnn"
+	"github.com/dbrushchenko/delta-mem-go/internal/session"
 	"github.com/dbrushchenko/delta-mem-go/internal/thoughts"
 	"github.com/dbrushchenko/delta-mem-go/internal/turbovec"
 )
@@ -25,6 +26,7 @@ type Service struct {
 	turbovecCli *turbovec.Client
 	thoughts    *thoughts.Engine
 	embedder    *embeddings.Embedder
+	sessions    *session.Manager
 	started     time.Time
 }
 
@@ -35,6 +37,7 @@ func New(deltaOM *deltamem.OwnerManager, ibnnOM *ibnn.OwnerManager, turboOM *tur
 		om: deltaOM, ibnnOM: ibnnOM, turboOM: turboOM, gemma: gemmaClient, turbovecCli: turbovecClient,
 		thoughts: thoughts.New(deltaOM, ibnnOM, turboOM, gemmaClient),
 		embedder: e,
+		sessions: session.NewManager(30 * time.Minute),
 		started:  time.Now(),
 	}
 }
@@ -47,7 +50,7 @@ func (s *Service) Store(ctx context.Context, owner, key, content string) (float3
 		// Index for retrieval
 		if s.turboOM != nil {
 			id := key
-			if len(id) > 60 { id = id[:60] }
+			if len(id) > 200 { id = id[:200] }
 			s.turboOM.AddVector(owner, id, hidden)
 			s.turboOM.Save(owner)
 		}
@@ -193,7 +196,7 @@ func (s *Service) StoreDeep(ctx context.Context, owner, key, content string) (fl
 
 	// turbovec (service layer index)
 	id := key
-	if len(id) > 60 { id = id[:60] }
+	if len(id) > 200 { id = id[:200] }
 	if s.turboOM != nil {
 		s.turboOM.AddVector(owner, id, hidden)
 		s.turboOM.Save(owner)
@@ -248,3 +251,35 @@ func (s *Service) AmIConfident(ctx context.Context, owner, text string) (int, fl
 	}
 	return int(conf), raw
 }
+
+// SessionSearch performs a session-aware search: respects budget, dedup, score threshold.
+func (s *Service) SessionSearch(ctx context.Context, sessionID, owner string, st session.SessionType, query []float32, k int) ([]string, []float32, error) {
+	sess := s.sessions.GetOrCreate(sessionID, owner, st)
+
+	var ids []string
+	var scores []float32
+	var err error
+	if s.turboOM != nil {
+		ids, scores, err = s.turboOM.SearchVector(owner, query, k)
+	}
+	if err != nil { return nil, nil, err }
+
+	// Filter by session policy
+	var filteredIDs []string
+	var filteredScores []float32
+	for i, id := range ids {
+		if sess.ShouldInject(id, scores[i]) {
+			label := id
+			if len(label) > sess.Policy.MaxChars { label = label[:sess.Policy.MaxChars] }
+			filteredIDs = append(filteredIDs, label)
+			filteredScores = append(filteredScores, scores[i])
+			// Estimate token cost (~4 chars per token)
+			tokenCost := len(label) / 4
+			sess.RecordInjection(id, scores[i], tokenCost)
+		}
+	}
+	return filteredIDs, filteredScores, nil
+}
+
+// Sessions returns the session manager for direct access (e.g. from gRPC interceptor).
+func (s *Service) Sessions() *session.Manager { return s.sessions }
